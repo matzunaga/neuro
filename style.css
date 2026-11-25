@@ -85,8 +85,8 @@ h1,.length{-webkit-text-stroke:2px #fff;paint-order:fill stroke}
 @media (min-width:700px){.neuron-app{background:radial-gradient(circle at 62% 50%,#0088b3 0%,#009fc9 38%,#25c3e8 100%)}.vignette{background:radial-gradient(circle at 62% 50%,transparent 35%,rgba(255,255,255,.12) 100%)}}
 h1,.length{text-shadow:0 .03em .1em rgba(0,0,0,.15)}
 .neuron-app,.vignette{background:none}
-.neuron-app{background:linear-gradient(90deg,#3acbea 0%,#13b4de 35%,#0096c2 70%,#007ea8 100%)}
-@media (min-width:700px){.neuron-app{background:linear-gradient(90deg,#3acbea 0%,#13b4de 35%,#0096c2 70%,#007ea8 100%)}.vignette{background:none}}
+.neuron-app{background:linear-gradient(90deg,#3acbea 0%,#13b4de 35%,#0a9fca 70%,#1a94bd 100%)}
+@media (min-width:700px){.neuron-app{background:linear-gradient(90deg,#3acbea 0%,#13b4de 35%,#0a9fca 70%,#1a94bd 100%)}.vignette{background:none}}
 .footer,.footer .link,.topright .link{color:rgba(255,255,255,.86)}
 .link:hover,.link[aria-expanded="true"]{color:#fff}
 #fit{background:linear-gradient(105deg,rgba(255,255,255,.7) 40%,#fff 50%,rgba(255,255,255,.7) 60%) 100% 0/250% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
