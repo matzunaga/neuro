@@ -40,7 +40,7 @@
     $("celltype").textContent = m.cell_type.split(", ").slice(0, 2).join(" · ");
     $("length").textContent = fmt(m.dendrite_um);
     $("region").textContent = m.region;
-    $("source").textContent = "Source · " + m.source + " · " + m.archive;
+    $("source").innerHTML = `<span class="t">Source</span><span class="v">${esc(m.archive)}</span><span class="t">Database</span><span class="v">${esc(m.source)}</span>`;
     $("count").textContent = (cur + 1) + " / " + list.length;
     renderCredit(m);
     fetch(m.file).then((r) => r.json()).then((d) => {
