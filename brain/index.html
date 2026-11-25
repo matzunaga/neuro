@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Brain — a whole fruit fly brain, drawn from open data</title>
+<meta name="description" content="A whole fruit fly brain, neuron by neuron, drawn from the FlyWire connectome. Zoom from the whole brain down to single cells.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css?v=36">
+<link rel="stylesheet" href="brain.css?v=1">
+</head>
+<body>
+<main class="neuron-app brain-app">
+  <canvas id="field" aria-label="A fruit fly brain drawn in three dimensions. Drag to rotate, pinch or scroll to zoom."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <h1>B<span class="rest">rain<span class="eyebrow">Fruit fly connectome</span></span></h1>
+  </header>
+
+  <div class="topright">
+    <button class="link" id="about" aria-expanded="false" aria-controls="credit">About this brain</button>
+  </div>
+
+  <p class="hint" id="hint">Drag to turn &middot; pinch to zoom</p>
+
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">Credit</p>
+    <dl>
+      <dt>Brain</dt><dd>Adult female <i>Drosophila melanogaster</i>, about 140,000 neurons. A sample of the cells is drawn here.</dd>
+      <dt>Data</dt><dd>FlyWire connectome, FAFB v783 skeletons. <a href="https://zenodo.org/records/10877326">Zenodo record 10877326</a></dd>
+      <dt>Papers</dt><dd>Dorkenwald et al., <i>Neuronal wiring diagram of an adult brain</i>, Nature 2024. Schlegel et al., <i>Whole-brain annotation and multi-connectome cell typing of Drosophila</i>, Nature 2024.</dd>
+      <dt>Credit</dt><dd>FlyWire Consortium, Princeton University, the Allen Institute, and the FAFB electron microscopy dataset from Zheng et al., Cell 2018.</dd>
+      <dt>License</dt><dd>Published under CC BY, and FlyWire's own principles page says non-commercial use. This page is free to view and is not for sale.</dd>
+      <dt>Pulses</dt><dd>The moving light is an illustration. It does not show real activity.</dd>
+    </dl>
+    <p class="fine">Skeletons are thinned for display. Scroll or pinch to zoom toward a point, drag to rotate, two fingers or shift-drag to move. For illustration only.</p>
+  </aside>
+
+  <footer class="footer">
+    <button class="link" id="fit" aria-label="Fit the whole brain on screen">Fit</button>
+  </footer>
+
+  <p class="offline-notice" id="offline" hidden>Could not load the brain data. Try again in a moment.</p>
+  <noscript><p class="no-script">Brain needs JavaScript enabled.</p></noscript>
+</main>
+<script src="brain.js?v=1"></script>
+</body>
+</html>

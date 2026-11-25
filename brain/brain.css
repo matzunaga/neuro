@@ -1,0 +1,5 @@
+.brain-app #field{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.brain-app #field:active{cursor:grabbing}
+.hint{position:absolute;z-index:3;left:1.5rem;bottom:calc(var(--safe-bottom,0px) + 1rem);margin:0;font-size:.8rem;letter-spacing:.04em;color:#282828;opacity:.8;transition:opacity 1.2s;pointer-events:none}
+.hint.gone{opacity:0}
+.brain-app h1 .eyebrow{bottom:96%}
