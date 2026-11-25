@@ -40,7 +40,7 @@
     $("celltype").textContent = m.cell_type.split(", ").slice(0, 2).join(" · ");
     $("length").innerHTML = fmt(m.dendrite_um).replace(/,/g, '<span class="comma">,</span>');
     $("region").textContent = m.region;
-    $("source").innerHTML = `<span class="t">Source</span><span class="v">${esc(m.archive)}</span><span class="t">Database</span><span class="v">${esc(m.source)}</span>`;
+    $("source").innerHTML = `<span class="t t1">Source</span><span class="v v1">${esc(m.archive)}</span><span class="t t2">Database</span><span class="v v2">${esc(m.source)}</span>`;
     $("count").textContent = (cur + 1) + " / " + list.length;
     renderCredit(m);
     fetch(m.file).then((r) => r.json()).then((d) => {
@@ -154,7 +154,7 @@
     e.style.left = gap + "px"; e.style.fontSize = "";
     var fs = parseFloat(getComputedStyle(e).fontSize), n = e.scrollWidth - fs * 0.16;
     var t = r.offsetWidth - gap - pad;
-    e.style.fontSize = (fs * t / n) + "px";
+    var k = 0.82; e.style.fontSize = (fs * t * k / n) + "px"; e.style.left = (gap + t * (1 - k) / 2) + "px";
   }
   window.addEventListener("load", fit); window.addEventListener("resize", fit);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
