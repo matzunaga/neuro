@@ -89,7 +89,7 @@
       // soma glow
       const [sx, sy] = proj(0, 0, 0), sr = Math.max(segs.soma[3] * sc * 1.6, 5);
       const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 4.4);
-      g.addColorStop(0, `rgba(110,225,252,${0.62 * fade})`); g.addColorStop(0.35, `rgba(110,225,252,${0.26 * fade})`); g.addColorStop(1, "rgba(110,225,252,0)");
+      g.addColorStop(0, `rgba(110,225,252,${0.3 * fade})`); g.addColorStop(0.35, `rgba(110,225,252,${0.26 * fade})`); g.addColorStop(1, "rgba(110,225,252,0)");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, sr * 4.4, 0, 6.2832); ctx.fill();
       // bucketed paths
       const paths = new Map();
