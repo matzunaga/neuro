@@ -69,4 +69,4 @@ h1{font-size:clamp(3rem,13vw,6.5rem);letter-spacing:-.055em;line-height:.9;margi
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
 h1,.length{text-shadow:0 .03em .14em rgba(0,40,60,.25)}
-.length .comma{font-size:.55em;letter-spacing:0}
+.length .comma{font-size:.55em;letter-spacing:0;margin-left:.1em}
