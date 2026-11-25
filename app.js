@@ -74,8 +74,8 @@
     if (segs) {
       fade = Math.min(1, fade + dt / 1.1);
       const wide = W > 700;
-      const cx = W * (wide ? 0.62 : 0.5), cy = H * (wide ? 0.5 : 0.3);
-      const R = wide ? Math.min(W * 0.3, H * 0.4) : Math.min(W * 0.5, H * 0.26);
+      const cx = W * (wide ? 0.62 : 0.5), cy = H * (wide ? 0.5 : 0.33);
+      const R = wide ? Math.min(W * 0.345, H * 0.46) : Math.min(W * 0.575, H * 0.3);
       const sc = (R / segs.extent) * zoom, D = 4 * segs.extent;
       const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
       const a = segs.a, n = segs.n;
