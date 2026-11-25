@@ -27,7 +27,7 @@
   }`;
   const FS = `#version 300 es
   precision mediump float;
-  in float v_i; in float v_depth; in float v_imp; uniform float u_min; uniform float u_alpha; uniform float u_pulse;
+  in float v_i; in float v_depth; in float v_imp; uniform float u_min; uniform float u_glow; uniform float u_alpha; uniform float u_pulse;
   out vec4 o;
   void main(){
     if (v_imp < u_min) discard;
@@ -37,6 +37,7 @@
     float k = clamp(v_i * u_pulse, 0.0, 1.0);
     vec3 c = mix(base, hot, k);
     float al = clamp(a + k * 0.9, 0.0, 1.0);
+    if (u_glow > 0.5) { if (k < 0.55) discard; al = (k - 0.5) * 0.12; c = hot; }
     o = vec4(c * al, al);
   }`;
   function sh(t, s) { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; }
@@ -45,7 +46,7 @@
   gl.linkProgram(pr);
   if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
   gl.useProgram(pr);
-  const U = {}; ["u_rot", "u_scale", "u_pan", "u_time", "u_alpha", "u_pulse", "u_off", "u_min"].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
+  const U = {}; ["u_rot", "u_scale", "u_pan", "u_time", "u_alpha", "u_pulse", "u_off", "u_min", "u_glow"].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
   const L = { pos: gl.getAttribLocation(pr, "a_pos"), dist: gl.getAttribLocation(pr, "a_dist"), nid: gl.getAttribLocation(pr, "a_nid"), imp: gl.getAttribLocation(pr, "a_imp") };
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -59,13 +60,13 @@
     const [pos, dist, nid, idx, imp] = await Promise.all(["pos", "dist", "nid", "idx", "imp"].map((k) => get(`data/${p}_${k}.bin.gz`)));
     const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
     const buf = (data, loc, size, type, norm) => { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, type, norm, 0, 0); };
-    buf(new Int16Array(pos), L.pos, 3, gl.SHORT, false);
+    const pa = new Int16Array(pos); buf(pa, L.pos, 3, gl.SHORT, false);
     buf(new Uint16Array(dist), L.dist, 1, gl.UNSIGNED_SHORT, true);
     buf(new Uint16Array(nid), L.nid, 1, gl.UNSIGNED_SHORT, false);
     buf(new Uint8Array(imp), L.imp, 1, gl.UNSIGNED_BYTE, true);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(idx), gl.STATIC_DRAW);
-    return { vao, n: idx.byteLength / 4 };
+    return { vao, n: idx.byteLength / 4, pos: pa };
   }
 
   let coarse = null, detail = null, detailLoading = false;
@@ -81,9 +82,9 @@
   }
   window.addEventListener("resize", resize); resize();
 
-  const base = () => wide() ? 1.38 : 1.29; // fraction of half-height used at zoom 1
+  const base = () => wide() ? 1.38 : 1.08; // fraction of half-height used at zoom 1
   function fit() { zoom = 1; panx = 0; pany = 0; }
-  $("fit").onclick = () => { fit(); };
+  $("fit").onclick = () => { fly = null; fit(); hint.classList.remove("gone"); };
 
   function rotMat() {
     const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
@@ -94,7 +95,7 @@
   // input
   const ptrs = new Map(); let last = null, pinch = null, moved = 0;
   const hint = $("hint");
-  function touched() { autoSpin = false; hint.classList.add("gone"); }
+  function touched() { autoSpin = false; fly = null; hint.classList.add("gone"); }
   function zoomAt(k, sx, sy) {
     const nz = Math.min(60, Math.max(1, zoom * k)); k = nz / zoom; zoom = nz;
     const nx = (sx / W) * 2 - 1, ny = 1 - (sy / H) * 2;
@@ -135,12 +136,44 @@
       gl.uniform2f(U.u_off, ox * px, oy * py);
       gl.drawElements(gl.LINES, l.n, gl.UNSIGNED_INT, 0);
     }
+    if (l === coarse && zoom < 12) {
+      gl.uniform1f(U.u_glow, 1); gl.uniform1f(U.u_min, 0);
+      for (const [ox, oy] of [[1.5, 0], [-1.5, 0], [0, 1.5], [0, -1.5]]) {
+        gl.uniform2f(U.u_off, ox * px, oy * py);
+        gl.drawElements(gl.LINES, l.n, gl.UNSIGNED_INT, 0);
+      }
+      gl.uniform1f(U.u_glow, 0);
+    }
+  }
+  let fly = null;
+  function easeIO(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+  async function dive() {
+    touched();
+    if (!detail && !detailLoading) { detailLoading = true; try { detail = await loadLevel("d"); } catch (e) { return; } }
+    let tries = 0; while (!detail && tries++ < 100) await new Promise((r) => setTimeout(r, 100));
+    if (!detail) return;
+    const n = detail.pos.length / 3, i = Math.floor(Math.random() * n) * 3;
+    const a = [detail.pos[i] / 32000, detail.pos[i + 1] / 32000, detail.pos[i + 2] / 32000];
+    fly = { t: performance.now(), dur: 4500, a, z0: zoom, z1: 28, px0: panx, py0: pany };
+  }
+  $("dive").onclick = dive;
+  function flyStep(now) {
+    if (!fly) return;
+    const e = easeIO(Math.min(1, (now - fly.t) / fly.dur));
+    zoom = Math.exp(Math.log(fly.z0) * (1 - e) + Math.log(fly.z1) * e);
+    const r = rotMat(), a = fly.a;
+    const x = r[0] * a[0] + r[3] * a[1] + r[6] * a[2], y = r[1] * a[0] + r[4] * a[1] + r[7] * a[2];
+    const m = Math.min(W, H), s = base() * zoom;
+    panx = fly.px0 * (1 - e) + -x * ((s * m) / W) * e;
+    pany = fly.py0 * (1 - e) + -y * ((s * m) / H) * e;
+    if (now - fly.t > fly.dur) fly = null;
   }
   let t0 = performance.now(), prev = t0;
   function draw(now) {
     requestAnimationFrame(draw);
     const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
     if (autoSpin) yaw += dt * 0.12;
+    flyStep(now);
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     if (!coarse) return;
     const s = base() * zoom;
@@ -153,7 +186,7 @@
     // coarse
     const zf = Math.min(1, Math.max(0, (zoom - 2) / 6));
     gl.bindVertexArray(coarse.vao);
-    gl.uniform1f(U.u_alpha, 0.15 - 0.05 * zf);
+    gl.uniform1f(U.u_alpha, (0.15 - 0.05 * zf) * (wide() ? 1 : 0.55));
     gl.uniform1f(U.u_pulse, 1);
     pass(coarse);
     if (zoom > 2.2 && !detail && !detailLoading) {
@@ -162,7 +195,7 @@
     }
     if (detail) {
       gl.bindVertexArray(detail.vao);
-      gl.uniform1f(U.u_alpha, 0.42 * Math.max(0, Math.min(1, (zoom - 1.8) / 3)));
+      gl.uniform1f(U.u_alpha, (wide() ? 0.42 : 0.3) * Math.max(0, Math.min(1, (zoom - 1.8) / 3)));
       pass(detail);
     }
   }
@@ -173,6 +206,7 @@
 (function () {
   function fit() {
     var e = document.querySelector("h1 .eyebrow"), r = e && e.parentNode; if (!e) return;
+    e.textContent = window.innerWidth < 500 ? "Fruit fly" : "Fruit fly connectome";
     var h = parseFloat(getComputedStyle(r).fontSize), gap = h * 0.11, pad = h * 0.07;
     e.style.left = gap + "px"; e.style.fontSize = "";
     var fs = parseFloat(getComputedStyle(e).fontSize), n = e.scrollWidth - fs * 0.16;
