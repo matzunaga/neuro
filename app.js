@@ -74,7 +74,7 @@
     if (segs) {
       fade = Math.min(1, fade + dt / 1.1);
       const wide = W > 700;
-      const cx = W * (wide ? 0.62 : 0.5), cy = H * (wide ? 0.5 : 0.33);
+      const cx = W * (wide ? 0.62 : 0.5), cy = H * (wide ? 0.58 : 0.42);
       const R = wide ? Math.min(W * 0.345, H * 0.46) : Math.min(W * 0.575, H * 0.3);
       geom = { cx, cy, R };
       const sc = (R / segs.extent) * zoom, D = 4 * segs.extent;
