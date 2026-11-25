@@ -5,7 +5,7 @@
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let W = 0, H = 0, dpr = 1;
   let list = [], cur = 0, cell = null, fade = 0;
-  let yaw = 0.6, pitch = -0.25, zoom = 1, userAt = 0, lastAuto = performance.now(), tPrev = performance.now();
+  let yaw = 0.6, pitch = -0.25, zoom = 1.3, geom = { cx: 0, cy: 0, R: 1 }, userAt = 0, lastAuto = performance.now(), tPrev = performance.now();
   let segs = null;
 
   function resize() {
@@ -76,6 +76,7 @@
       const wide = W > 700;
       const cx = W * (wide ? 0.62 : 0.5), cy = H * (wide ? 0.5 : 0.33);
       const R = wide ? Math.min(W * 0.345, H * 0.46) : Math.min(W * 0.575, H * 0.3);
+      geom = { cx, cy, R };
       const sc = (R / segs.extent) * zoom, D = 4 * segs.extent;
       const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
       const a = segs.a, n = segs.n;
@@ -137,6 +138,7 @@
   $("next").onclick = () => { userAt = performance.now(); show(cur + 1); };
   $("prev").onclick = () => { userAt = performance.now(); show(cur - 1); };
   addEventListener("keydown", (e) => { if (e.key === "ArrowRight") $("next").click(); else if (e.key === "ArrowLeft") $("prev").click(); else if (e.key === "Escape") closeCredit(); });
+  $("fit").onclick = () => { const g = geom; zoom = Math.max(0.5, Math.min(4, Math.min(g.cx, W - g.cx, g.cy, H - g.cy) * 0.85 / g.R)); userAt = performance.now(); };
   const credit = $("credit"), about = $("about");
   function closeCredit() { credit.hidden = true; document.querySelector(".neuron-app").classList.remove("open"); about.setAttribute("aria-expanded", "false"); }
   about.onclick = () => { const open = credit.hidden; credit.hidden = !open; document.querySelector(".neuron-app").classList.toggle("open", open); about.setAttribute("aria-expanded", String(open)); };
