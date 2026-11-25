@@ -87,9 +87,9 @@
       };
       // soma glow
       const [sx, sy] = proj(0, 0, 0), sr = Math.max(segs.soma[3] * sc * 1.6, 5);
-      const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 3.2);
-      g.addColorStop(0, `rgba(255,255,255,${0.4 * fade})`); g.addColorStop(0.35, `rgba(255,255,255,${0.15 * fade})`); g.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, sr * 3.2, 0, 6.2832); ctx.fill();
+      const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 4.4);
+      g.addColorStop(0, `rgba(110,225,252,${0.34 * fade})`); g.addColorStop(0.35, `rgba(110,225,252,${0.13 * fade})`); g.addColorStop(1, "rgba(110,225,252,0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, sr * 4.4, 0, 6.2832); ctx.fill();
       // bucketed paths
       const paths = new Map();
       const ext = segs.extent;
