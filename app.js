@@ -153,7 +153,7 @@
     var h = parseFloat(getComputedStyle(r).fontSize), gap = h * 0.11, pad = h * 0.07;
     e.style.left = gap + "px"; e.style.fontSize = "";
     var fs = parseFloat(getComputedStyle(e).fontSize), n = e.scrollWidth - fs * 0.16;
-    var t = r.getBoundingClientRect().width - gap - pad;
+    var t = r.offsetWidth - gap - pad;
     e.style.fontSize = (fs * t / n) + "px";
   }
   window.addEventListener("load", fit); window.addEventListener("resize", fit);
