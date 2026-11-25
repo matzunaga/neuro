@@ -6,13 +6,14 @@
   if (!gl) { $("offline").hidden = false; $("offline").textContent = "This page needs WebGL."; return; }
 
   const VS = `#version 300 es
-  in vec3 a_pos; in float a_dist; in float a_nid;
-  uniform mat3 u_rot; uniform vec2 u_scale; uniform vec2 u_pan; uniform float u_time; uniform float u_ext;
-  out float v_i; out float v_depth;
+  in vec3 a_pos; in float a_dist; in float a_nid; in float a_imp;
+  uniform mat3 u_rot; uniform vec2 u_scale; uniform vec2 u_pan; uniform float u_time; uniform float u_ext; uniform vec2 u_off;
+  out float v_i; out float v_depth; out float v_imp;
   float h(float n){ return fract(sin(n*12.9898)*43758.5453); }
   void main(){
     vec3 p = u_rot * (a_pos / 32000.0);
-    gl_Position = vec4(p.xy * u_scale + u_pan, p.z * -0.4, 1.0);
+    gl_Position = vec4(p.xy * u_scale + u_pan + u_off, p.z * -0.4, 1.0);
+    v_imp = a_imp;
     v_depth = p.z * 0.5 + 0.5;
     float sp = (0.10 + 0.22 * h(a_nid + 1.0)) * 0.45;
     float ph = h(a_nid + 7.0);
@@ -26,9 +27,10 @@
   }`;
   const FS = `#version 300 es
   precision mediump float;
-  in float v_i; in float v_depth; uniform float u_alpha; uniform float u_pulse;
+  in float v_i; in float v_depth; in float v_imp; uniform float u_min; uniform float u_alpha; uniform float u_pulse;
   out vec4 o;
   void main(){
+    if (v_imp < u_min) discard;
     float a = u_alpha * (0.35 + 0.65 * v_depth);
     vec3 base = vec3(1.0);
     vec3 hot = vec3(1.0, 0.93, 0.35);
@@ -43,8 +45,8 @@
   gl.linkProgram(pr);
   if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
   gl.useProgram(pr);
-  const U = {}; ["u_rot", "u_scale", "u_pan", "u_time", "u_alpha", "u_pulse"].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
-  const L = { pos: gl.getAttribLocation(pr, "a_pos"), dist: gl.getAttribLocation(pr, "a_dist"), nid: gl.getAttribLocation(pr, "a_nid") };
+  const U = {}; ["u_rot", "u_scale", "u_pan", "u_time", "u_alpha", "u_pulse", "u_off", "u_min"].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
+  const L = { pos: gl.getAttribLocation(pr, "a_pos"), dist: gl.getAttribLocation(pr, "a_dist"), nid: gl.getAttribLocation(pr, "a_nid"), imp: gl.getAttribLocation(pr, "a_imp") };
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
   async function get(url) {
@@ -54,12 +56,13 @@
     return new Response(s).arrayBuffer();
   }
   async function loadLevel(p) {
-    const [pos, dist, nid, idx] = await Promise.all(["pos", "dist", "nid", "idx"].map((k) => get(`data/${p}_${k}.bin.gz`)));
+    const [pos, dist, nid, idx, imp] = await Promise.all(["pos", "dist", "nid", "idx", "imp"].map((k) => get(`data/${p}_${k}.bin.gz`)));
     const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
     const buf = (data, loc, size, type, norm) => { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, type, norm, 0, 0); };
     buf(new Int16Array(pos), L.pos, 3, gl.SHORT, false);
     buf(new Uint16Array(dist), L.dist, 1, gl.UNSIGNED_SHORT, true);
     buf(new Uint16Array(nid), L.nid, 1, gl.UNSIGNED_SHORT, false);
+    buf(new Uint8Array(imp), L.imp, 1, gl.UNSIGNED_BYTE, true);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(idx), gl.STATIC_DRAW);
     return { vao, n: idx.byteLength / 4 };
@@ -124,6 +127,15 @@
   $("closeCredit").onclick = closeCredit;
   window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeCredit(); });
 
+  function pass(l) {
+    const px = 0.6 * 2 / W, py = 0.6 * 2 / H;
+    const tiers = [[0, 0, 0, 0], [0.6, 1, 0, 0], [0.6, -1, 0, 0], [0.85, 0, 1, 0], [0.85, 0, -1, 0]];
+    for (const [mn, ox, oy] of tiers) {
+      gl.uniform1f(U.u_min, mn);
+      gl.uniform2f(U.u_off, ox * px, oy * py);
+      gl.drawElements(gl.LINES, l.n, gl.UNSIGNED_INT, 0);
+    }
+  }
   let t0 = performance.now(), prev = t0;
   function draw(now) {
     requestAnimationFrame(draw);
@@ -143,7 +155,7 @@
     gl.bindVertexArray(coarse.vao);
     gl.uniform1f(U.u_alpha, 0.15 - 0.05 * zf);
     gl.uniform1f(U.u_pulse, 1);
-    gl.drawElements(gl.LINES, coarse.n, gl.UNSIGNED_INT, 0);
+    pass(coarse);
     if (zoom > 2.2 && !detail && !detailLoading) {
       detailLoading = true;
       loadLevel("d").then((l) => (detail = l)).catch(() => {});
@@ -151,7 +163,7 @@
     if (detail) {
       gl.bindVertexArray(detail.vao);
       gl.uniform1f(U.u_alpha, 0.42 * Math.max(0, Math.min(1, (zoom - 1.8) / 3)));
-      gl.drawElements(gl.LINES, detail.n, gl.UNSIGNED_INT, 0);
+      pass(detail);
     }
   }
   loadLevel("c").then((l) => { coarse = l; }).catch(() => { $("offline").hidden = false; });
