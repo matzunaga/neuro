@@ -5,7 +5,7 @@
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let W = 0, H = 0, dpr = 1;
   let list = [], cur = 0, cell = null, fade = 0;
-  let yaw = 0.6, pitch = -0.25, zoom = 1.3, geom = { cx: 0, cy: 0, R: 1 }, userAt = 0, lastAuto = performance.now(), tPrev = performance.now();
+  let yaw = 0.6, pitch = -0.25, zoom = 1.75, geom = { cx: 0, cy: 0, R: 1 }, userAt = 0, lastAuto = performance.now(), tPrev = performance.now();
   let segs = null;
 
   function resize() {
