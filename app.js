@@ -38,7 +38,7 @@
     cur = (i + list.length) % list.length;
     const m = list[cur];
     $("celltype").textContent = m.cell_type.split(", ").slice(0, 2).join(" · ");
-    $("length").textContent = fmt(m.dendrite_um);
+    $("length").innerHTML = fmt(m.dendrite_um).replace(/,/g, '<span class="comma">,</span>');
     $("region").textContent = m.region;
     $("source").innerHTML = `<span class="t">Source</span><span class="v">${esc(m.archive)}</span><span class="t">Database</span><span class="v">${esc(m.source)}</span>`;
     $("count").textContent = (cur + 1) + " / " + list.length;
@@ -86,7 +86,7 @@
       // soma glow
       const [sx, sy] = proj(0, 0, 0), sr = Math.max(segs.soma[3] * sc * 1.6, 5);
       const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 3.2);
-      g.addColorStop(0, `rgba(255,255,255,${0.75 * fade})`); g.addColorStop(0.35, `rgba(255,255,255,${0.28 * fade})`); g.addColorStop(1, "rgba(255,255,255,0)");
+      g.addColorStop(0, `rgba(255,255,255,${0.4 * fade})`); g.addColorStop(0.35, `rgba(255,255,255,${0.15 * fade})`); g.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, sr * 3.2, 0, 6.2832); ctx.fill();
       // bucketed paths
       const paths = new Map();
@@ -103,12 +103,14 @@
         path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]);
       }
       ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.shadowColor = "rgba(0,40,60,0.15)"; ctx.shadowBlur = 5 * dpr; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 2 * dpr;
       for (const [k, path] of paths) {
         const axon = k >= 12, kk = k % 12, wb = (kk / 4) | 0, ab = kk % 4;
         ctx.lineWidth = WB[wb] * (axon ? 0.8 : 1);
         ctx.strokeStyle = `rgba(255,255,255,${AB[ab] * (axon ? 0.55 : 1) * fade})`;
         ctx.stroke(path);
       }
+      ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
     }
     requestAnimationFrame(draw);
   }
