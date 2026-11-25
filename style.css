@@ -76,3 +76,7 @@ h1,.length{-webkit-text-stroke:2px #fff;paint-order:fill stroke}
 #fit{color:transparent;-webkit-text-fill-color:transparent;background:linear-gradient(105deg,rgba(255,255,255,.55) 40%,#fff 50%,rgba(255,255,255,.55) 60%) 100% 0/250% 100% no-repeat;-webkit-background-clip:text;background-clip:text;animation:fitsweep 3.4s ease-in-out infinite}
 #fit:hover{background-position:0 0;animation:none;-webkit-text-fill-color:#fff}
 @keyframes fitsweep{0%,35%{background-position:100% 0}80%,100%{background-position:0 0}}
+.location,.unit,.trend,.footer,.footer .link,.topright .link{color:#282828}
+.link:hover,.link[aria-expanded="true"]{color:#000}
+#fit{background:linear-gradient(105deg,#282828 40%,#fff 50%,#282828 60%) 100% 0/250% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#fit:hover{background-position:0 0;animation:none;-webkit-text-fill-color:#000}
