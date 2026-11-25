@@ -34,13 +34,13 @@
   const fmt = (n) => Math.round(n).toLocaleString("en-US");
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
+  let updatedText = "";
   function show(i) {
     cur = (i + list.length) % list.length;
     const m = list[cur];
     $("celltype").textContent = m.cell_type.split(", ").slice(0, 2).join(" · ");
     $("length").innerHTML = fmt(m.dendrite_um).replace(/,/g, '<span class="comma">,</span>');
     $("region").textContent = m.region;
-    $("source").innerHTML = `<span class="t t1">Source</span><span class="v v1">${esc(m.archive)}</span><span class="t t2">Database</span><span class="v v2">${esc(m.source)}</span>`;
     $("count").textContent = (cur + 1) + " / " + list.length;
     renderCredit(m);
     fetch(m.file).then((r) => r.json()).then((d) => {
@@ -54,10 +54,12 @@
       ["Species", "Human"], ["Region", m.region], ["Cell type", m.cell_type], ["Completeness", m.integrity],
     ];
     if (m.tissue) rows.push(["Tissue", m.tissue]);
-    rows.push(["Source", m.link ? `<a href="${esc(m.link)}" target="_blank" rel="noopener">${esc(m.source)}</a> · ${esc(m.archive)}` : esc(m.source)]);
+    rows.push(["Source", esc(m.archive)]);
+    rows.push(["Database", m.link ? `<a href="${esc(m.link)}" target="_blank" rel="noopener">${esc(m.source)}</a>` : esc(m.source)]);
     if (m.pub) rows.push(["Publication", `<a href="${esc(m.pub)}" target="_blank" rel="noopener">${esc(m.pub.replace("https://", ""))}</a>`]);
     rows.push(["Cell", esc(m.name)]);
-    $("creditList").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${/^<a /.test(v) || k === "Source" ? v : esc(v)}</dd>`).join("");
+    if (updatedText) rows.push(["Refreshed", esc(updatedText)]);
+    $("creditList").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${/^<a /.test(v) || k === "Source" || k === "Database" || k === "Cell" || k === "Refreshed" ? v : esc(v)}</dd>`).join("");
     $("creditFine").textContent = m.credit + ". Reconstructions are simplified for display; lengths are measured from the original tracing. For illustration, not for clinical use.";
   }
 
@@ -141,7 +143,7 @@
   $("closeCredit").onclick = closeCredit;
 
   fetch("data/index.json", { cache: "no-cache" }).then((r) => r.json()).then((d) => {
-    list = d.neurons; $("updated").textContent = "Refreshed " + d.updated;
+    list = d.neurons; updatedText = d.updated;
     cur = Math.floor(Math.random() * list.length); show(cur);
   }).catch(() => { $("offline").hidden = false; $("celltype").textContent = "Unavailable"; });
   requestAnimationFrame(draw);
