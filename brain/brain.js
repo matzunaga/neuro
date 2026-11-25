@@ -14,7 +14,7 @@
     vec3 p = u_rot * (a_pos / 32000.0);
     gl_Position = vec4(p.xy * u_scale + u_pan, p.z * -0.4, 1.0);
     v_depth = p.z * 0.5 + 0.5;
-    float sp = (0.10 + 0.22 * h(a_nid + 1.0)) * 0.75;
+    float sp = (0.10 + 0.22 * h(a_nid + 1.0)) * 0.45;
     float ph = h(a_nid + 7.0);
     float w = 0.045 + 0.05 * h(a_nid + 3.0);
     float t = fract(u_time * sp + ph) * 3.0;
