@@ -105,7 +105,7 @@
         path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]);
       }
       ctx.lineCap = "round"; ctx.lineJoin = "round";
-      ctx.shadowColor = "rgba(30,90,255,0.7)"; ctx.shadowBlur = 9 * dpr; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+      ctx.shadowColor = "rgba(0,0,0,0.15)"; ctx.shadowBlur = 5 * dpr; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 2 * dpr;
       for (const [k, path] of paths) {
         const axon = k >= 12, kk = k % 12, wb = (kk / 4) | 0, ab = kk % 4;
         ctx.lineWidth = WB[wb] * (axon ? 0.8 : 1);

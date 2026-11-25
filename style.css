@@ -64,7 +64,7 @@ h1{font-size:clamp(3rem,13vw,6.5rem);letter-spacing:-.055em;line-height:.9;margi
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
-h1,.length{text-shadow:0 0 .12em rgba(30,90,255,.9),0 0 .4em rgba(30,90,255,.55)}
+h1,.length{text-shadow:0 0 .1em rgba(30,90,255,.4),0 0 .3em rgba(30,90,255,.2)}
 .length .comma{font-size:.55em;letter-spacing:0;margin-left:.1em}
 h1 .rest{letter-spacing:.01em}
 .footer .link{min-height:0;padding:0}
