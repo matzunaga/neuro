@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Body — a human CT scan, drawn as points</title>
+<meta name="description" content="A real human CT scan turned into 450,000 points. Skeleton, organs and vessels, with light pulsing through.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css?v=36">
+<link rel="stylesheet" href="body.css?v=1">
+</head>
+<body>
+<main class="neuron-app body-app">
+  <canvas id="field" aria-label="A human body drawn as points from a CT scan. Drag to rotate, pinch or scroll to zoom."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <h1>B<span class="rest">ody<span class="eyebrow">Human CT scan</span></span></h1>
+  </header>
+
+  <div class="topright">
+    <button class="link" id="about" aria-expanded="false" aria-controls="credit">About this body</button>
+  </div>
+
+  <p class="hint" id="hint">Drag to turn &middot; pinch to zoom</p>
+
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">Credit</p>
+    <dl>
+      <dt>Scan</dt><dd>One anonymized adult CT scan, head to upper thighs, case s0224 of the TotalSegmentator dataset. About 450,000 points are drawn from it.</dd>
+      <dt>Structures</dt><dd>Bones, muscle, lungs, heart and vessels, organs, brain and spinal cord, and the skin surface. Outlined from 117 labeled structures.</dd>
+      <dt>Data</dt><dd>Wasserthal et al., <i>TotalSegmentator: Robust Segmentation of 104 Anatomical Structures in CT Images</i>, Radiology: Artificial Intelligence 2023. <a href="https://zenodo.org/records/10047292">Zenodo record 10047292</a></dd>
+      <dt>Credit</dt><dd>University Hospital Basel and the TotalSegmentator team.</dd>
+      <dt>License</dt><dd>Dataset published under CC BY 4.0. Free to view here.</dd>
+      <dt>Pulses</dt><dd>The moving light is an illustration. It is not a measurement of anything in the body.</dd>
+    </dl>
+    <p class="fine">Points are sampled from the scan for display. Scroll or pinch to zoom toward a point, drag to rotate, two fingers or shift-drag to move. For illustration only, not for medical use.</p>
+  </aside>
+
+  <footer class="footer">
+    <button class="link" id="dive" aria-label="Fly into the body">Dive</button>
+    <button class="link" id="fit" aria-label="Fit the whole body on screen">Fit</button>
+  </footer>
+
+  <p class="offline-notice" id="offline" hidden>Could not load the body data. Try again in a moment.</p>
+  <noscript><p class="no-script">Body needs JavaScript enabled.</p></noscript>
+</main>
+<script src="body.js?v=1"></script>
+</body>
+</html>
