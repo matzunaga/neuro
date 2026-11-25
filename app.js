@@ -28,7 +28,49 @@
     const dist = []; for (let i = 0; i < s.length; i += 8) dist.push(Math.hypot(s[i], s[i+1], s[i+2]));
     dist.sort((p, q) => p - q);
     const ext = Math.max(dist[Math.floor(dist.length * 0.96)] * 1.08, 60);
-    return { a: Float32Array.from(s), n: s.length / 8, soma: d.soma, extent: ext };
+    return { a: Float32Array.from(s), n: s.length / 8, soma: d.soma, extent: ext, tips: tipPaths(d, qx), pulses: null };
+  }
+
+  // root-to-tip paths so light pulses can run outward along real branches
+  function tipPaths(d, qx) {
+    const ch = d.chains, at = new Map(), par = new Array(ch.length).fill(null), kids = new Uint8Array(ch.length);
+    ch.forEach(([, f], ci) => { for (let i = 0; i + 2 < f.length; i += 4) { const k = f[i] + "," + f[i+1] + "," + f[i+2]; let l = at.get(k); if (!l) at.set(k, l = []); l.push([ci, i / 4]); } });
+    ch.forEach(([, f], ci) => {
+      if (!f.length || (f[0] === 0 && f[1] === 0 && f[2] === 0)) return;
+      const l = at.get(f[0] + "," + f[1] + "," + f[2]); const m = l && l.find((e) => e[0] < ci);
+      if (m) { par[ci] = m; kids[m[0]] = 1; }
+    });
+    const out = [];
+    ch.forEach(([, f], ci) => {
+      if (kids[ci] || f.length < 8) return;
+      const parts = []; let c = ci, end = f.length / 4 - 1, guard = 0;
+      while (c !== null && guard++ < 400) {
+        const cf = ch[c][1], pts = [];
+        for (let i = 0; i <= end; i++) pts.push(cf[i*4] / qx, cf[i*4+1] / qx, cf[i*4+2] / qx);
+        parts.push(pts);
+        const p = par[c]; if (!p) break; c = p[0]; end = p[1];
+      }
+      const flat = [].concat(...parts.reverse());
+      const n = flat.length / 3, cum = new Float32Array(n);
+      for (let i = 1; i < n; i++) cum[i] = cum[i-1] + Math.hypot(flat[i*3] - flat[i*3-3], flat[i*3+1] - flat[i*3-2], flat[i*3+2] - flat[i*3-1]);
+      if (cum[n-1] > 1) out.push({ p: Float32Array.from(flat), cum, n, len: cum[n-1] });
+    });
+    return out;
+  }
+  const spriteC = document.createElement("canvas"); spriteC.width = spriteC.height = 48;
+  (() => { const c = spriteC.getContext("2d"), g = c.createRadialGradient(24, 24, 0, 24, 24, 24);
+    g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.18, "rgba(225,250,255,0.9)"); g.addColorStop(0.5, "rgba(150,235,255,0.28)"); g.addColorStop(1, "rgba(150,235,255,0)");
+    c.fillStyle = g; c.fillRect(0, 0, 48, 48); })();
+  function respawn(p, S, first) {
+    p.path = S.tips[(Math.random() * S.tips.length) | 0];
+    p.speed = S.extent * (0.1 + Math.random() * 0.4);
+    p.s = 0; p.wait = first ? Math.random() * 6 : 0.3 + Math.random() * 3.5;
+  }
+  function pointAt(path, d, o) {
+    const cum = path.cum; let lo = 0, hi = path.n - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] <= d) lo = m; else hi = m; }
+    const seg = cum[hi] - cum[lo] || 1, t = Math.max(0, Math.min(1, (d - cum[lo]) / seg)), P = path.p;
+    o[0] = P[lo*3] + (P[hi*3] - P[lo*3]) * t; o[1] = P[lo*3+1] + (P[hi*3+1] - P[lo*3+1]) * t; o[2] = P[lo*3+2] + (P[hi*3+2] - P[lo*3+2]) * t;
   }
 
   const fmt = (n) => Math.round(n).toLocaleString("en-US");
@@ -114,6 +156,27 @@
         ctx.stroke(path);
       }
       ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      if (!reduce && segs.tips.length) {
+        if (!segs.pulses) { segs.pulses = []; const N = Math.min(wide ? 38 : 22, Math.max(5, Math.round(segs.tips.length * 0.7))); for (let i = 0; i < N; i++) { const p = {}; respawn(p, segs, true); segs.pulses.push(p); } }
+        const K = 8, tl = segs.extent * 0.07, pt = [0, 0, 0], pos = [];
+        for (const p of segs.pulses) {
+          if (p.wait > 0) { p.wait -= dt; continue; }
+          p.s += p.speed * dt;
+          if (p.s - tl > p.path.len) { respawn(p, segs, false); continue; }
+          pos.length = 0;
+          for (let k = 0; k <= K; k++) { const d = Math.min(p.s, p.path.len) - (k / K) * tl; if (d < 0) break; pointAt(p.path, d, pt); pos.push(proj(pt[0], pt[1], pt[2])); }
+          if (pos.length < 2) continue;
+          const dep = Math.max(0.45, Math.min(1, 0.75 - pos[0][2] / (2 * ext)));
+          const head = p.s <= p.path.len, life = Math.min(1, (p.path.len - Math.min(p.s, p.path.len) + tl) / tl);
+          ctx.lineCap = "round";
+          for (let k = 0; k + 1 < pos.length; k++) {
+            const f = 1 - k / K;
+            ctx.strokeStyle = `rgba(215,248,255,${0.85 * f * f * dep * fade})`; ctx.lineWidth = 0.8 + 2 * f;
+            ctx.beginPath(); ctx.moveTo(pos[k][0], pos[k][1]); ctx.lineTo(pos[k+1][0], pos[k+1][1]); ctx.stroke();
+          }
+          if (head) { ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = dep * fade * Math.min(1, life + 0.3); const r = 9; ctx.drawImage(spriteC, pos[0][0] - r, pos[0][1] - r, r * 2, r * 2); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; }
+        }
+      }
     }
     requestAnimationFrame(draw);
   }
