@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Neuron — real human neurons, drawn from open data</title>
+<meta name="description" content="Real human neurons, reconstructed by researchers and drawn here from open data. Credits on every cell.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<main class="neuron-app">
+  <canvas id="field" aria-label="A human neuron drawn in three dimensions. Drag to rotate."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <p class="eyebrow">Human neuron field</p>
+    <h1>Neuron</h1>
+  </header>
+
+  <section class="reading" aria-live="polite">
+    <p class="location" id="celltype">Loading</p>
+    <div class="primary-reading">
+      <span class="length" id="length">—</span>
+      <span class="unit">microns of dendrite</span>
+    </div>
+    <p class="trend" id="region"></p>
+    <div class="next-event">
+      <span id="source"></span>
+      <button class="link" id="about" aria-expanded="false" aria-controls="credit">About this cell</button>
+    </div>
+  </section>
+
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">Credit</p>
+    <dl id="creditList"></dl>
+    <p class="fine" id="creditFine"></p>
+  </aside>
+
+  <footer class="footer">
+    <span id="updated"></span>
+    <span class="controls">
+      <button class="link" id="prev" aria-label="Previous cell">Prev</button>
+      <span id="count"></span>
+      <button class="link" id="next" aria-label="Next cell">Next</button>
+    </span>
+  </footer>
+
+  <p class="offline-notice" id="offline" hidden>Could not load the neuron data. Try again in a moment.</p>
+  <noscript><p class="no-script">Neuron needs JavaScript enabled to draw the cells.</p></noscript>
+</main>
+<script src="app.js?v=1"></script>
+</body>
+</html>
