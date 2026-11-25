@@ -68,3 +68,5 @@ h1,.length{text-shadow:0 .03em .14em rgba(0,40,60,.25)}
 .length .comma{font-size:.55em;letter-spacing:0;margin-left:.1em}
 h1 .rest{letter-spacing:.01em}
 .footer .link{min-height:0;padding:0}
+h1,.length{color:rgba(255,255,255,.5);-webkit-text-stroke:1px #fff;paint-order:stroke fill}
+h1 .eyebrow{-webkit-text-stroke:0}
