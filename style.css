@@ -64,7 +64,7 @@ h1{font-size:clamp(3rem,13vw,6.5rem);letter-spacing:-.055em;line-height:.9;margi
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
-h1,.length{text-shadow:0 .03em .14em rgba(140,232,255,.35)}
+h1,.length{text-shadow:0 0 .12em rgba(30,90,255,.9),0 0 .4em rgba(30,90,255,.55)}
 .length .comma{font-size:.55em;letter-spacing:0;margin-left:.1em}
 h1 .rest{letter-spacing:.01em}
 .footer .link{min-height:0;padding:0}
@@ -72,3 +72,4 @@ h1,.length{color:rgba(255,255,255,.5);-webkit-text-stroke:1px #fff;paint-order:s
 h1 .eyebrow{-webkit-text-stroke:0}
 h1,.length{-webkit-text-stroke:2px #fff;paint-order:fill stroke}
 .grain{opacity:.28;mix-blend-mode:overlay}
+.grain{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1.8 0 0 0 -.4 1.8 0 0 0 -.4 1.8 0 0 0 -.4 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.22;mix-blend-mode:overlay}
