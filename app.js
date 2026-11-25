@@ -144,3 +144,14 @@
   }).catch(() => { $("offline").hidden = false; $("celltype").textContent = "Unavailable"; });
   requestAnimationFrame(draw);
 })();
+
+(function () {
+  function fit() {
+    var e = document.querySelector("h1 .eyebrow"), r = e && e.parentNode; if (!e) return;
+    e.style.fontSize = ""; e.style.letterSpacing = "";
+    var fs = parseFloat(getComputedStyle(e).fontSize), n = e.scrollWidth, t = r.getBoundingClientRect().width - e.offsetLeft;
+    e.style.fontSize = (fs * t / n) + "px";
+  }
+  window.addEventListener("load", fit); window.addEventListener("resize", fit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+})();
