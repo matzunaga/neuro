@@ -87,3 +87,7 @@ h1,.length{text-shadow:0 .03em .1em rgba(0,0,0,.15)}
 .neuron-app,.vignette{background:none}
 .neuron-app{background:linear-gradient(90deg,#3acbea 0%,#13b4de 35%,#0096c2 70%,#007ea8 100%)}
 @media (min-width:700px){.neuron-app{background:linear-gradient(90deg,#3acbea 0%,#13b4de 35%,#0096c2 70%,#007ea8 100%)}.vignette{background:none}}
+.footer,.footer .link,.topright .link{color:rgba(255,255,255,.86)}
+.link:hover,.link[aria-expanded="true"]{color:#fff}
+#fit{background:linear-gradient(105deg,rgba(255,255,255,.7) 40%,#fff 50%,rgba(255,255,255,.7) 60%) 100% 0/250% 100% no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#fit:hover{background-position:0 0;animation:none;-webkit-text-fill-color:#fff}
