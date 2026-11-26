@@ -1,0 +1,4 @@
+.protein-app .hint{position:absolute;z-index:3;left:0;right:0;top:calc(var(--safe-top) + 7.5rem);margin:0;text-align:center;font-size:.75rem;color:#282828;opacity:.8;transition:opacity 1.2s;pointer-events:none}
+.protein-app .hint.gone{opacity:0}
+.protein-app .length{font-size:clamp(3.5rem,15vw,6rem)}
+.protein-app h1 .eyebrow{bottom:96%}

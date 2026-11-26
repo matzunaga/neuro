@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Protein — human hemoglobin, sliced from open data</title>
+<meta name="description" content="Human hemoglobin drawn as stacked contour slices from Protein Data Bank entry 4HHB.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css?v=36">
+<link rel="stylesheet" href="protein.css?v=1">
+</head>
+<body>
+<main class="neuron-app protein-app">
+  <canvas id="field" aria-label="Human hemoglobin as contour slices. Drag up or down to scan, sideways to turn."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="masthead"><h1>P<span class="rest">rotein<span class="eyebrow">Human hemoglobin</span></span></h1></header>
+  <div class="topright"><button class="link" id="about" aria-expanded="false" aria-controls="credit">About this protein</button></div>
+  <section class="reading" aria-live="polite">
+    <p class="location">Slice depth</p>
+    <div class="primary-reading"><span class="length" id="depth">—</span><span class="unit">angstroms</span></div>
+    <p class="trend" id="note">Loading</p>
+  </section>
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">Credit</p>
+    <dl>
+      <dt>Protein</dt><dd>Human hemoglobin without oxygen (deoxyhemoglobin). It carries oxygen in red blood cells.</dd>
+      <dt>Red</dt><dd>The four heme groups. The dot in each is iron, where oxygen binds.</dd>
+      <dt>Data</dt><dd><a href="https://www.rcsb.org/structure/4HHB">Protein Data Bank entry 4HHB</a>, 1.74 angstrom crystal structure, 1984. Loaded directly from RCSB PDB.</dd>
+      <dt>Paper</dt><dd>Fermi, Perutz, Shaanan, Fourme, J. Mol. Biol. 175, 159 (1984).</dd>
+      <dt>License</dt><dd><a href="https://www.rcsb.org/pages/usage-policy">PDB data are free of copyright restrictions (CC0)</a>.</dd>
+    </dl>
+    <p class="fine">Contours are a smoothed surface computed from atom positions, not measured electron density. Water is left out. For illustration only.</p>
+  </aside>
+  <footer class="footer"><button class="link" id="fit" aria-label="Show the whole stack">Whole</button></footer>
+  <p class="hint" id="hint">Drag up or down to slice &middot; sideways to turn</p>
+  <p class="offline-notice" id="offline" hidden>Could not load the protein data. Try again in a moment.</p>
+  <noscript><p class="no-script">Protein needs JavaScript enabled.</p></noscript>
+</main>
+<script src="protein.js?v=1"></script>
+</body>
+</html>
