@@ -12,7 +12,7 @@
 </head>
 <body>
 <main class="neuron-app protein-app">
-  <canvas id="field" aria-label="Human hemoglobin as contour slices. Drag up or down to scan, sideways to turn."></canvas>
+  <canvas id="field" aria-label="Human hemoglobin as a point cloud with contour slices. Drag up or down to scan, sideways to turn."></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="masthead"><h1>P<span class="rest">rotein<span class="eyebrow">Human hemoglobin</span></span></h1></header>
   <div class="topright"><button class="link" id="about" aria-expanded="false" aria-controls="credit">About this protein</button></div>
@@ -31,13 +31,13 @@
       <dt>Paper</dt><dd>Fermi, Perutz, Shaanan, Fourme, J. Mol. Biol. 175, 159 (1984).</dd>
       <dt>License</dt><dd><a href="https://www.rcsb.org/pages/usage-policy">PDB data are free of copyright restrictions (CC0)</a>.</dd>
     </dl>
-    <p class="fine">Contours are a smoothed surface computed from atom positions, not measured electron density. Water is left out. For illustration only.</p>
+    <p class="fine">Dots start at real atom positions, with extra scattered dots to suggest size; their gathering onto the line is animation. Contours are a smoothed surface computed from atom positions, not measured electron density. Water is left out. For illustration only.</p>
   </aside>
   <footer class="footer"><button class="link" id="fit" aria-label="Show the whole stack">Whole</button></footer>
   <p class="hint" id="hint">Drag up or down to slice &middot; sideways to turn</p>
   <p class="offline-notice" id="offline" hidden>Could not load the protein data. Try again in a moment.</p>
   <noscript><p class="no-script">Protein needs JavaScript enabled.</p></noscript>
 </main>
-<script src="protein.js?v=1"></script>
+<script src="protein.js?v=2"></script>
 </body>
 </html>

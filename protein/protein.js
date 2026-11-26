@@ -42,7 +42,24 @@ function contour(set,z,level){
 const heme=atoms.filter(a=>a.res==='HEM'),iron=heme.filter(a=>a.el.toUpperCase()==='FE');
 const slices=[...Array(S)].map((_,i)=>{const z=zmin+i*dz;return{z,out:contour(atoms,z,.55),in:contour(atoms,z,1.5),heme:contour(heme,z,.6)}});
 
-let yaw=.5,cut=S>>1,target=cut,whole=false,W,H,drag=null,idle=true;
+/* point cloud: one dot on each atom centre, three scattered around it for size */
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const dots=[];
+atoms.forEach(a=>{for(let j=0;j<(a.res==='HEM'?9:4);j++){
+  const u=rnd()*2-1,th=rnd()*6.2832,r=j?.5+rnd()*1.1:0,q=Math.sqrt(1-u*u);
+  dots.push({x:a.p[0]+r*q*Math.cos(th),y:a.p[1]+r*q*Math.sin(th),z:a.p[2]+r*u,h:a.res==='HEM'})}});
+/* for each slice, where a nearby dot lands when it joins the contour line */
+const cache=[];
+function targets(i){
+  if(cache[i])return cache[i];
+  const s=slices[i],m=new Map();
+  dots.forEach((d,n)=>{if(Math.abs(d.z-s.z)>2.6)return;const seg=d.h?s.heme:s.out;let best=7,bx,by;
+    for(let k=0;k<seg.length;k+=2){const q=(seg[k]-d.x)**2+(seg[k+1]-d.y)**2;if(q<best){best=q;bx=seg[k];by=seg[k+1]}}
+    if(bx!==undefined)m.set(n,[bx,by])});
+  return cache[i]=m;
+}
+
+let yaw=.5,cut=S>>1,target=cut,whole=false,gather=0,W,H,drag=null,idle=true;
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 function size(){const d=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
 addEventListener('resize',size);size();
@@ -59,14 +76,23 @@ function draw(t){
   const ca=Math.cos(yaw),sa=Math.sin(yaw),tilt=.5,lift=.95;
   const pr=(x,y,z)=>[cx+(x*ca-y*sa)*k,cy+((x*sa+y*ca)*tilt-z*lift)*k];
   const path=(seg,z)=>{g.beginPath();for(let i=0;i<seg.length;i+=4){const a=pr(seg[i],seg[i+1],z),b=pr(seg[i+2],seg[i+3],z);g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}};
-  const now=Math.round(cut);g.lineCap='round';
-  slices.forEach((s,i)=>{
-    const on=!whole&&i===now;
-    const al=whole?.42:on?1:i<now?.13:.035;
-    g.strokeStyle=`rgba(255,255,255,${al})`;g.lineWidth=on?1.8:.8;path(s.out,s.z);g.stroke();
-    if(on){g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=.9;path(s.in,s.z);g.stroke()}
-    if(s.heme.length){g.strokeStyle=`rgba(214,31,38,${whole?.8:on?1:i<now?.35:.12})`;g.lineWidth=on?2.6:1;path(s.heme,s.z);g.stroke()}
-  });
+  const now=Math.round(cut),sl=slices[now],land=targets(now);
+  gather+=((whole?0:1)-gather)*.12;
+  const zc=zmin+cut*dz,buckets=[[],[],[],[],[],[]];
+  dots.forEach((d,n)=>{
+    let {x,y,z}=d,w=0;const to=land.get(n);
+    if(to){w=Math.max(0,1-Math.abs(d.z-zc)/2.6);w=w*w*(3-2*w)*gather;x+=(to[0]-x)*w;y+=(to[1]-y)*w;z+=(sl.z-z)*w}
+    const lv=w>.15?2:(whole||d.z<zc)?1:0;
+    const [px,py]=pr(x,y,z);buckets[(d.h?3:0)+lv].push(px,py)});
+  buckets.forEach((b,i)=>{const red=i>2,lv=i%3;
+    const al=red?[.3,.7,1][lv]:[.13,whole?.6:.36,.95][lv];
+    g.fillStyle=red?`rgba(214,31,38,${al})`:`rgba(255,255,255,${al})`;
+    const r=lv===2?1.9:red?1.6:1.3;
+    for(let k=0;k<b.length;k+=2)g.fillRect(b[k]-r/2,b[k+1]-r/2,r,r)});
+  if(!whole){
+    g.lineCap='round';g.strokeStyle='#fff';g.lineWidth=1.8;path(sl.out,sl.z);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=.9;path(sl.in,sl.z);g.stroke();
+    g.strokeStyle='#d61f26';g.lineWidth=2.6;path(sl.heme,sl.z);g.stroke()}
   const z=zmin+cut*dz;let near=0;
   for(const a of iron){const d=Math.abs(a.p[2]-z),hot=!whole&&d<1.8;if(hot)near++;
     const [x,y]=pr(...a.p);g.beginPath();g.arc(x,y,hot?6.5:3,0,7);g.fillStyle='#d61f26';
