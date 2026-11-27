@@ -9,6 +9,7 @@ const MORPHS=[
   {name:'Green and black',body:INK,mark:'#52e39a',spot:INK,leg:INK,patch:'#52e39a',dot:INK},
   {name:'Golden',body:'#e9a800',mark:'#ffd21f',spot:'#f3b90c',leg:'#e9a800',patch:'#ffd21f',dot:'#f3b90c'}];
 let M=MORPHS[0];
+const SLIM=.74; /* narrows the whole frog side to side */
 const clamp=v=>Math.max(0,Math.min(1,v)),ease=v=>{v=clamp(v);return v*v*(3-2*v)},mix=(a,b,t)=>a+(b-a)*t;
 const turnTo=(a,b,t)=>a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*t;
 
@@ -134,16 +135,19 @@ function state(t){
 }
 function paint(s){
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(s.hidden)return;
-  /* the shadow slides away, shrinks and softens as the frog rises: this is what reads as height */
-  const res=mix(.3,.09,s.z)*S*2,box=420;shade.width=shade.height=Math.max(8,Math.round(box*res));
-  sx.setTransform(res,0,0,res,shade.width/2,shade.height/2);sx.rotate(s.a);sx.scale(s.sx,s.sy);silhouette(sx,s.pose);
-  const k=S*(1-.12*s.z),size=box*k;
-  ctx.globalAlpha=mix(.46,.2,s.z);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(shade,s.x+S*(6+62*s.z)-size/2,s.y+S*(9+96*s.z)-size/2,size,size);ctx.globalAlpha=1;
-  ctx.translate(s.x,s.y);const g=S*(1+.42*s.z);ctx.scale(g,g);ctx.rotate(s.a);ctx.scale(s.sx,s.sy);drawFrog(ctx,s.pose);
+  /* the shadow slides away, blurs and fades as the frog rises: this is what reads as height.
+     Blur uses the canvas drop shadow (phone Safari has no canvas filter): the sharp copy is drawn off screen. */
+  const box=420,res=S*dpr,n=Math.max(8,Math.round(box*res));if(shade.width!==n)shade.width=shade.height=n;
+  sx.setTransform(1,0,0,1,0,0);sx.clearRect(0,0,n,n);
+  sx.setTransform(res,0,0,res,n/2,n/2);sx.rotate(s.a);sx.scale(s.sx,s.sy*SLIM);silhouette(sx,s.pose);
+  const x=(s.x+S*(6+75*s.z))*dpr,y=(s.y+S*(9+115*s.z))*dpr,far=cv.width+n*2;
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);
+  ctx.shadowColor=`rgba(0,45,66,${mix(.5,.3,s.z)})`;ctx.shadowBlur=(1.5+22*s.z)*dpr;ctx.shadowOffsetX=far;
+  ctx.drawImage(shade,x-n/2-far,y-n/2);ctx.restore();
+  ctx.translate(s.x,s.y);const g=S*(1+.1*s.z);ctx.scale(g,g);ctx.rotate(s.a);ctx.scale(s.sx,s.sy*SLIM);drawFrog(ctx,s.pose);
 }
 function size(){dpr=Math.min(devicePixelRatio||1,3);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
-  S=Math.min(W*.0026,H*.0017,1.7)*.5;plan()}
+  S=Math.min(W*.0026,H*.0017,1.7)*.34;plan()}
 const label=document.getElementById('morph');
 const frozen=new URLSearchParams(location.search).get('t');
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
