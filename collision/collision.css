@@ -1,0 +1,18 @@
+.collision-app h1{position:relative;display:inline-block;margin-top:.7rem;font-size:clamp(2.6rem,12vw,6rem)}
+.collision-app h1 .rest{position:static}
+.collision-app h1 .eyebrow{left:50%;bottom:100%;margin-bottom:1.1em;transform:translateX(-50%);padding-left:.16em}
+.collision-app .topright{top:calc(var(--safe-top) - .6rem)}
+.collision-app .layers{position:absolute;z-index:4;left:1.5rem;right:1.5rem;top:calc(var(--safe-top) + 5.4rem);display:flex;flex-wrap:wrap;gap:.2rem 1.1rem}
+.collision-app .layers button{background:none;border:0;border-bottom:2px solid transparent;padding:.4rem 0;font:500 .625rem/1.5 inherit;font-family:inherit;letter-spacing:.14em;text-transform:uppercase;color:#282828;opacity:.55;cursor:pointer}
+.collision-app .layers button[aria-pressed=true]{opacity:1;border-bottom-color:#fff}
+.collision-app .hint{position:absolute;z-index:3;left:0;right:0;top:calc(var(--safe-top) + 11rem);margin:0;text-align:center;font-size:.75rem;color:#282828;opacity:.8;transition:opacity 1.2s;pointer-events:none}
+.collision-app .hint.gone{opacity:0}
+.collision-app .length{font-size:clamp(3.5rem,15vw,6rem);letter-spacing:-.05em}
+.collision-app .part{margin:.8rem 0 0;font-size:.95rem;color:#111;font-weight:600}
+.collision-app .trend{margin-top:.2rem;max-width:calc(100vw - 13rem)}
+.collision-app .credit{max-height:64vh}
+.collision-app .credit dl{grid-template-columns:1fr;gap:.2rem}
+.collision-app .credit dd{margin-bottom:.6rem}
+.collision-app .red{color:#fff;background:#db2129;padding:0 .3em}
+.collision-app .yellow{color:#111;background:#ffe600;padding:0 .3em}
+@media (min-width:700px){.collision-app .layers{left:3rem;right:3rem}}

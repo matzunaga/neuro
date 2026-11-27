@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Collision — CERN proton collisions in 3D, from open data</title>
+<meta name="description" content="Thirteen Higgs boson candidate collisions recorded by the CMS detector, drawn in 3D from CERN Open Data.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css?v=36">
+<link rel="stylesheet" href="collision.css?v=1">
+</head>
+<body>
+<main class="neuron-app collision-app">
+  <canvas id="field" aria-label="A particle collision in 3D. Drag to turn, pinch to zoom, tap a track."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="masthead"><h1>C<span class="rest">ollision<span class="eyebrow">CERN &middot; CMS detector</span></span></h1></header>
+  <div class="topright"><button class="link" id="about" aria-expanded="false" aria-controls="credit">About this data</button></div>
+  <nav class="layers" id="layers" aria-label="Show or hide layers"></nav>
+  <section class="reading" aria-live="polite">
+    <p class="location">Combined mass</p>
+    <div class="primary-reading"><span class="length" id="mass">—</span><span class="unit">GeV</span></div>
+    <p class="part" id="part">Loading</p><p class="trend" id="note"></p>
+  </section>
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">About and credit</p>
+    <dl>
+      <dt>What you see</dt><dd>One collision between protons at CERN’s Large Hadron Collider, as reconstructed by the CMS detector. The beams run along one axis and meet in the middle.</dd>
+      <dt>Why these</dt><dd>CERN picked these 13 events for education because the highlighted particles have a combined mass of 120 to 130 GeV, where the Higgs boson sits. They are candidates. Ordinary processes make events that look the same, so no single one is proof of a Higgs.</dd>
+      <dt>Colors</dt><dd><b class="red">Red</b>: muons in the highlighted group. <b class="yellow">Yellow</b>: electrons or photons in the group. White: everything else. Dark dashes: missing momentum, what the detector could not account for sideways.</dd>
+      <dt>Layers</dt><dd>Tracks are charged particles. Hits are points where the tracker was touched. Energy is what calorimeter cells absorbed. Muon system shows chambers and segments on the outside. Jets are sprays of particles.</dd>
+      <dt>Data</dt><dd>Thomas McCauley for the CMS Collaboration, <i>Higgs candidate events for use in education and outreach</i>, CERN Open Data Portal, <a href="https://doi.org/10.7483/OPENDATA.CMS.N9MJ.QEEC">DOI 10.7483/OPENDATA.CMS.N9MJ.QEEC</a>. Recorded in 2011 and 2012.</dd>
+      <dt>License</dt><dd><a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0 1.0</a>. Neither CMS nor CERN endorses this page.</dd>
+      <dt>Limits</dt><dd>The files hold a subset of each event and are not suitable for physics analysis. The two-photon files carry no tracker hits or jets, so those events look sparser.</dd>
+      <dt>Drawing</dt><dd>Tracks are smooth curves between the stored end points and directions. Photons leave no track, so each is drawn as a straight line from its vertex to the calorimeter. Energy bar length and brightness grow with energy, capped. Jets appear above 20 GeV, as cones of a chosen shape. The faint rings are guides placed at the radius of the calorimeter cells. Colors, widths and the outward animation are design choices.</dd>
+    </dl>
+    <p class="fine">For illustration only.</p>
+  </aside>
+  <footer class="footer"><span class="controls"><button class="link" id="prev" aria-label="Previous event">Prev</button><span>Event</span><button class="link" id="next" aria-label="Next event">Next</button></span><button class="link" id="fit">Whole</button></footer>
+  <p class="hint" id="hint">Drag to turn &middot; pinch to zoom &middot; tap a track</p>
+  <p class="offline-notice" id="offline" hidden>Could not load the collision data. Try again in a moment.</p>
+  <noscript><p class="no-script">Collision needs JavaScript enabled.</p></noscript>
+</main>
+<script src="collision.js?v=1"></script>
+</body>
+</html>
