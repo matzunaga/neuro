@@ -2,12 +2,10 @@
 const cv=document.getElementById('field'),ctx=cv.getContext('2d');
 const shade=document.createElement('canvas'),sx=shade.getContext('2d');
 const INK='#0d0d0f',TAU=Math.PI*2;
-/* colour forms of real poison frogs: body, back marking, back spots, leg skin, leg marking, leg spots */
-const MORPHS=[
-  {name:'Yellow-banded',body:INK,mark:'#ffe21a',spot:INK,leg:INK,patch:'#ffe21a',dot:INK},
-  {name:'Strawberry',body:'#d92c1c',mark:'#f0452b',spot:'#3a0d0a',leg:'#172a78',patch:'#3155c4',dot:'#0b1238'},
-  {name:'Green and black',body:INK,mark:'#52e39a',spot:INK,leg:INK,patch:'#52e39a',dot:INK},
-  {name:'Golden',body:'#e9a800',mark:'#ffd21f',spot:'#f3b90c',leg:'#e9a800',patch:'#ffd21f',dot:'#f3b90c'}];
+/* each skin is cut from one real photo: 256x128 back, then five limb strips (right leg left half, left leg right half) */
+const MORPHS=[['Yellow-banded poison frog','leu42','Kaden Slone','#e8b400'],['Green and black poison frog','aur27','Roger A. Morales-Flores','#6fae9d'],
+  ['Strawberry poison frog','pum32','Roger A. Morales-Flores','#8fb4c8'],['Strawberry poison frog, blue jeans form','pum63','Tom Kennedy','#0e1430']]
+  .map(([name,file,by,toe])=>{const img=new Image();img.src=`data/${file}.jpg?v=2`;return{name,by,toe,img}});
 let M=MORPHS[0];
 const SLIM=.74; /* narrows the whole frog side to side */
 const clamp=v=>Math.max(0,Math.min(1,v)),ease=v=>{v=clamp(v);return v*v*(3-2*v)},mix=(a,b,t)=>a+(b-a)*t;
@@ -61,38 +59,37 @@ function band(c,x0,x1,w){c.beginPath();
 
 function drawFrog(c,pose){
   const L=limbs(pose);
+  const ok=M.img.complete&&M.img.naturalWidth;
   for(const l of L){
-    c.fillStyle=M.leg;c.fill(l.skin);c.fill(l.tip);
+    c.fillStyle=INK;c.fill(l.skin);c.fillStyle=M.toe;c.fill(l.tip);
+    const P=l.P,R=l.front?[8.5,5.5,3.6]:[14,9.5,6,4];
+    if(ok)for(let i=P.length-2;i>=0;i--){const a=P[i],b=P[i+1],len=Math.hypot(b[0]-a[0],b[1]-a[1]),cap=new Path2D();
+      capsule(cap,a,R[i],b,R[i+1]);
+      c.save();c.clip(cap);c.translate(a[0],a[1]);c.rotate(Math.atan2(b[1]-a[1],b[0]-a[0]));
+      c.drawImage(M.img,l.side>0?0:128,128+(l.front?3+i:i)*40,128,40,-R[i]*.7,-R[i],len+R[i]*.7+R[i+1]*.7,2*R[i]);c.restore()}
     c.save();c.clip(l.skin);
-    const P=l.P,spot=(i,t,rx,ry,col,off=0)=>{const a=P[i],b=P[i+1],r=Math.atan2(b[1]-a[1],b[0]-a[0]);
-      c.fillStyle=col;blob(c,mix(a[0],b[0],t)-Math.sin(r)*off,mix(a[1],b[1],t)+Math.cos(r)*off,rx,ry,r)};
-    if(l.front){spot(0,.7,10,7,M.patch);spot(1,.4,7,4.5,M.patch);spot(0,.75,3.2,2.6,M.dot,1)}
-    else{spot(0,.55,18,12,M.patch);spot(1,.5,17,7,M.patch);spot(2,.35,8,4,M.patch);
-      spot(0,.45,5,4,M.dot,3);spot(0,.75,3,3.4,M.dot,-5);spot(1,.38,4.5,3.6,M.dot,1);spot(1,.68,3,2.6,M.dot,-2)}
     /* rounded form: dark under edge, soft top light */
     c.lineJoin='round';c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=3;c.stroke(l.skin);
-    for(let i=0;i<P.length-1;i++){c.strokeStyle='rgba(255,255,255,.16)';c.lineCap='round';c.lineWidth=l.front?2.4:3.6;
+    for(let i=0;i<P.length-1;i++){c.strokeStyle='rgba(255,255,255,.07)';c.lineCap='round';c.lineWidth=l.front?2.4:3.6;
       c.beginPath();c.moveTo(P[i][0]-1.5,P[i][1]-2);c.lineTo(P[i+1][0]-1.5,P[i+1][1]-2);c.stroke()}
     c.restore();
   }
-  c.fillStyle=M.body;c.fill(BODY);
+  c.fillStyle=INK;c.fill(BODY);
   c.save();c.clip(BODY);
-  c.fillStyle=M.mark;band(c,17,34,1);band(c,-13,5,3.1);band(c,-41,-27,5);
-  blob(c,46,0,3.6,5);
-  c.fillStyle=M.spot;
-  for(const[x,y,rx,ry,r]of[[27,7,4.6,3.6,.5],[24,-9,3.6,3,-.4],[-3,10,5.4,4,.2],[-6,-8,4.2,4.8,1],[1,-1,2,2.4,0],[-34,5,3.8,3,-.6],[-33,-7,2.8,2.4,.3]])blob(c,x,y,rx,ry,r);
-  const edge=c.createRadialGradient(0,0,8,0,0,52);edge.addColorStop(0,'rgba(0,0,0,0)');edge.addColorStop(1,'rgba(0,0,0,.5)');
+  if(ok)c.drawImage(M.img,0,0,256,128,-48,-24,100,48);
+  const edge=c.createRadialGradient(0,0,8,0,0,52);edge.addColorStop(0,'rgba(0,0,0,0)');edge.addColorStop(1,'rgba(0,0,0,.4)');
   c.save();c.scale(1,.55);c.fillStyle=edge;c.fillRect(-60,-70,120,140);c.restore();
-  const gloss=c.createRadialGradient(8,-9,0,8,-9,26);gloss.addColorStop(0,'rgba(255,255,255,.34)');gloss.addColorStop(1,'rgba(255,255,255,0)');
+  const gloss=c.createRadialGradient(8,-9,0,8,-9,26);gloss.addColorStop(0,'rgba(255,255,255,.12)');gloss.addColorStop(1,'rgba(255,255,255,0)');
   c.fillStyle=gloss;c.fillRect(-50,-30,105,60);
-  c.fillStyle='rgba(255,255,255,.75)';blob(c,15,-8,5,1.7,-.2);blob(c,-19,-9,3,1.2,.15);
+  c.fillStyle='rgba(255,255,255,.2)';blob(c,15,-8,5,1.7,-.2);blob(c,-19,-9,3,1.2,.15);
   c.strokeStyle='rgba(0,0,0,.28)';c.lineWidth=1.2;c.beginPath();c.moveTo(34,0);c.quadraticCurveTo(0,2,-40,0);c.stroke();
   c.restore();
   for(const s of[1,-1]){
-    c.fillStyle=M.body;blob(c,31,17.5*s,8.8,7.6,.25*s);
+    c.save();c.translate(31,17.5*s);c.scale(.76,.76);c.translate(-31,-17.5*s);
+    c.fillStyle=INK;blob(c,31,17.5*s,8.8,7.6,.25*s);
     const g=c.createRadialGradient(33,18*s-2.5,.5,31,18*s,7);g.addColorStop(0,'#5a5148');g.addColorStop(.55,'#161312');g.addColorStop(1,'#000');
     c.fillStyle=g;blob(c,31.5,18.2*s,6.6,5.8,.25*s);
-    c.fillStyle='#fff';blob(c,33.5,18.2*s-2.4,1.9,1.5);
+    c.fillStyle='#fff';blob(c,33.5,18.2*s-2.4,1.9,1.5);c.restore();
     c.fillStyle='rgba(0,0,0,.7)';blob(c,48,3.6*s,1.3,1.1);
   }
 }
@@ -117,7 +114,7 @@ function plan(){
   hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*1.6})}
   let t=.35;for(const h of hops){h.t=t;t+=h.sit+CROUCH+AIR+LAND}total=t+GAP;
 }
-function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];label.textContent=M.name;plan()}
+function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];credit();plan()}
 function state(t){
   let h=hops[0];for(const q of hops)if(t>=q.t)h=q;
   const k=Math.max(0,t-h.t),dir=Math.atan2(h.y1-h.y0,h.x1-h.x0);
@@ -163,7 +160,8 @@ function paint(s,t){
 }
 function size(){dpr=Math.min(devicePixelRatio||1,3);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   S=Math.min(W*.0026,H*.0017,1.7)*.34;plan()}
-const label=document.getElementById('morph');
+const label=document.getElementById('morph'),by=document.getElementById('by');
+function credit(){label.textContent=M.name;by.textContent=M.by}
 const frozen=new URLSearchParams(location.search).get('t');
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 let playing=!calm;
