@@ -109,16 +109,18 @@ function plan(){
   /* carry the line on until it is fully off screen again */
   const out=Math.min(dx>0?(W+m-A[0])/dx:dx<0?(-m-A[0])/dx:1e9,dy>0?(H+m-A[1])/dy:dy<0?(-m-A[1])/dy:1e9);
   const reach=Math.max(150*S,Math.min(Math.min(W,H)*.36,330*S)),n=Math.max(3,Math.ceil(out/reach));
-  const at=i=>{const k=out*i/n,w=i>0&&i<n?Math.sin(i*2.1+u*6)*Math.min(W,H)*.06:0;return[A[0]+dx*k-dy*w,A[1]+dy*k+dx*w]};
+  const at=i=>{const k=out*i/n,w=i>0&&i<n?Math.sin(i*2.1+u*6)*Math.min(W,H)*.03:0;return[A[0]+dx*k-dy*w,A[1]+dy*k+dx*w]};
   const mid=Math.max(1,Math.min(n-1,Math.round(d/out*n)));
-  hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*.7})}
+  hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*.9})}
   let t=.35;for(const h of hops){h.t=t;t+=h.sit+CROUCH+AIR+LAND}total=t+GAP;
 }
 function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];label.textContent=M.name;plan()}
 function state(t){
   let h=hops[0];for(const q of hops)if(t>=q.t)h=q;
   const k=Math.max(0,t-h.t),dir=Math.atan2(h.y1-h.y0,h.x1-h.x0);
-  const s={x:h.x0,y:h.y0,a:dir,z:0,sx:1,sy:1,pose:{hind:0,tuck:0,reach:0},hidden:t<h.t};
+  const i=hops.indexOf(h),p=hops[i-1];
+  const heading=p?turnTo(Math.atan2(p.y1-p.y0,p.x1-p.x0),dir,ease((k-.08)/(h.sit+CROUCH*.6-.08))):dir;
+  const s={x:h.x0,y:h.y0,a:heading,z:0,sx:1,sy:1,pose:{hind:0,tuck:0,reach:0},hidden:t<h.t};
   const a=k-h.sit,b=a-CROUCH,c=b-AIR;
   if(a<0){s.sx=1+Math.sin(t*9)*.008;s.sy=1+Math.sin(t*9)*.018}
   else if(b<0){const u=ease(a/CROUCH);s.sx=1-.08*u;s.sy=1+.07*u}
@@ -127,14 +129,21 @@ function state(t){
     /* legs fire straight, trail, then fold under before touchdown */
     s.pose.hind=u<.62?1-Math.pow(1-clamp(u/.24),3):1-ease((u-.62)/.38);
     s.pose.tuck=ease(u/.2);s.pose.reach=ease((u-.5)/.38);
-    const st=Math.sin(Math.PI*clamp(u/.45));s.sx=1+.1*st;s.sy=1-.07*st}
+    const st=Math.sin(Math.PI*clamp(u/.45));const off=1-ease(u/.14);s.sx=1+.1*st-.08*off;s.sy=1-.07*st+.07*off}
   else{const u=clamp(c/LAND),hit=Math.sin(Math.PI*u)*(1-u*.4);
-    s.x=h.x1;s.y=h.y1;s.sx=1-.13*hit;s.sy=1+.12*hit;s.pose.reach=1-ease(u);s.pose.tuck=0;
-    if(u<.5){s.pose.reach=1-ease(u*2)*.6}else{s.pose.reach=0;s.pose.tuck=.4*(1-ease((u-.5)*2))}}
+    s.x=h.x1;s.y=h.y1;s.sx=1-.13*hit;s.sy=1+.12*hit;
+    s.pose.reach=1-ease(u*2);s.pose.tuck=1-ease((u-.5)*2)}
   return s;
 }
-function paint(s){
-  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(s.hidden)return;
+function ring(x,y,r,w,a){if(a<=0||r<=0)return;
+  ctx.lineWidth=w;ctx.strokeStyle=`rgba(225,250,255,${a})`;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
+  ctx.strokeStyle=`rgba(0,70,100,${a*.45})`;ctx.beginPath();ctx.arc(x,y,Math.max(0,r-w*1.3),0,TAU);ctx.stroke()}
+function splash(x,y,age,power){
+  for(let i=0;i<3;i++){const q=(age-i*.17)/1.25;if(q<=0||q>=1)continue;
+    ring(x,y,S*(26+190*power*(1-Math.pow(1-q,2))),(2.6-1.7*q)*(1-i*.18),.95*Math.min(1,power*1.2)*Math.pow(1-q,1.3)*(1-i*.22))}}
+function ripples(t){for(const h of hops){const jump=h.t+h.sit+CROUCH;splash(h.x0,h.y0,t-jump,.65);splash(h.x1,h.y1,t-jump-AIR,1)}}
+function paint(s,t){
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(t!==undefined)ripples(t);if(s.hidden)return;
   /* the shadow slides away, blurs and fades as the frog rises: this is what reads as height.
      Blur uses the canvas drop shadow (phone Safari has no canvas filter): the sharp copy is drawn off screen. */
   const box=420,res=S*dpr,n=Math.max(8,Math.round(box*res));if(shade.width!==n)shade.width=shade.height=n;
@@ -156,9 +165,9 @@ cv.onpointerdown=()=>{if(playing)next();else plan();playing=true;start=null};
 addEventListener('resize',()=>{size();start=null});
 size();
 function frame(now){
-  if(frozen!==null)paint(state(+frozen));
+  if(frozen!==null)paint(state(+frozen),+frozen);
   else if(playing){if(start===null)start=now;let t=(now-start)/1000;
-    if(t>total){start=now;t=0;next();if(calm)playing=false}paint(state(t))}
+    if(t>total){start=now;t=0;next();if(calm)playing=false}paint(state(t),t)}
   else paint({x:W/2,y:H*.52,a:0,z:0,sx:1,sy:1,pose:{hind:0,tuck:0,reach:0}});
   requestAnimationFrame(frame);
 }
