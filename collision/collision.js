@@ -100,7 +100,11 @@ function size(){dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.client
 function pan(dx,dy){const M=matrix(),S=scale(),x=-dx*2/W/S[0],y=dy*2/H/S[1];for(let i=0;i<3;i++)target[i]+=M[0][i]*x+M[1][i]*y}
 function zoomAt(f,x,y){const z=Math.max(.35,Math.min(40,zoom*f)),r=z/zoom,ox=x-W/2,oy=y-H*(1-shiftY())/2;pan(ox*(1/r-1),oy*(1/r-1));zoom=z;dirty=true}
 const touches=new Map();let moved=0,two=false;
-const start=()=>{idle=false;goal=null;$('hint').classList.add('gone')};
+let rest=0;
+const start=()=>{idle=false;goal=null;clearTimeout(rest);$('hint').classList.add('gone')};
+/* spin again a few seconds after the last touch, unless zoomed in to look closely */
+const resume=ms=>{clearTimeout(rest);rest=setTimeout(()=>{if(!touches.size&&zoom<2)idle=true},ms)};
+const turn=()=>{yaw=home.yaw+Math.atan2(Math.sin(yaw-home.yaw),Math.cos(yaw-home.yaw))};
 cv.onpointerdown=e=>{start();cv.setPointerCapture(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY,e.shiftKey]);if(touches.size===1){moved=0;two=false}else two=true};
 cv.onpointermove=e=>{const o=touches.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];moved+=Math.abs(dx)+Math.abs(dy);
   if(touches.size===1){if(o[2])pan(dx,dy);else{yaw+=dx*.008;pitch=Math.max(-1.55,Math.min(1.55,pitch+dy*.006))}}
@@ -109,8 +113,9 @@ cv.onpointermove=e=>{const o=touches.get(e.pointerId);if(!o)return;const dx=e.cl
     if(before>10)zoomAt(after/before,(e.clientX+q[0])/2,(e.clientY+q[1])/2);pan(dx/2,dy/2)}
   o[0]=e.clientX;o[1]=e.clientY;dirty=true};
 cv.onpointerup=e=>{if(touches.size===1&&!two&&moved<8)pick(e.clientX,e.clientY);touches.delete(e.pointerId)};
-cv.onpointercancel=e=>touches.delete(e.pointerId);
-cv.addEventListener('wheel',e=>{e.preventDefault();start();zoomAt(Math.exp(-e.deltaY*.0015),e.clientX,e.clientY)},{passive:false});
+cv.onpointercancel=e=>{touches.delete(e.pointerId);resume(4000)};
+cv.addEventListener('pointerup',()=>resume(4000));
+cv.addEventListener('wheel',e=>{e.preventDefault();start();zoomAt(Math.exp(-e.deltaY*.0015),e.clientX,e.clientY);resume(4000)},{passive:false});
 
 function screen(p){const M=matrix(),S=scale(),q=p.map((v,i)=>v-target[i]),v=M.map(r=>r[0]*q[0]+r[1]*q[1]+r[2]*q[2]),w=(24-v[2])/24;
   return[(v[0]*S[0]/w+1)*W/2,(1-(v[1]*S[1]/w+shiftY()))*H/2]}
@@ -141,8 +146,9 @@ async function show(i){
   if(want!==index)return;$('offline').hidden=true;
   ev=cache[want];picked=null;if(!guides)guides=makeGuides(ev);reveal=calm?99:0;t0=0;label();
 }
-$('next').onclick=()=>{start();show(index+1)};$('prev').onclick=()=>{start();show(index-1)};
-$('fit').onclick=()=>{start();goal={...home}};
+const go=d=>{start();idle=true;show(index+d)};
+$('next').onclick=()=>go(1);$('prev').onclick=()=>go(-1);
+$('fit').onclick=()=>{start();turn();goal={...home};idle=true};
 
 let S,M;
 function camera(P){gl.useProgram(P.p);gl.uniformMatrix3fv(P.u('R'),false,M);gl.uniform3fv(P.u('target'),target);gl.uniform2f(P.u('S'),S[0],S[1]);gl.uniform2f(P.u('shift'),0,shiftY())}
@@ -172,7 +178,7 @@ function render(){
 function frame(now){
   if(goal){const k=.14;yaw+=(goal.yaw-yaw)*k;pitch+=(goal.pitch-pitch)*k;zoom+=(goal.zoom-zoom)*k;target=target.map(v=>v*(1-k));dirty=true;
     if(Math.abs(zoom-goal.zoom)<.002&&Math.abs(yaw-goal.yaw)<.002)goal=null}
-  if(idle&&!calm){yaw+=.0014;dirty=true}
+  if(idle&&!goal&&!calm){yaw+=.0014;dirty=true}
   /* the collision opens outward from the middle */
   if(ev&&reveal<16){if(!t0)t0=now;const t=(now-t0)/1000;reveal=Math.max(reveal,t*t*1.6+t*.8);dirty=true}
   if(dirty){dirty=false;render()}

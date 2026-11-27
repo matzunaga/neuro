@@ -109,7 +109,11 @@ function zoomAt(f,x,y){const z=Math.max(.7,Math.min(30,zoom*f)),r=z/zoom;
   const ox=x-W/2,oy=y-H*(1-shiftY())/2;pan(ox*(1/r-1),oy*(1/r-1));zoom=z;dirty=true}
 
 const touches=new Map();let moved=0,two=false;
-const start=()=>{idle=false;goal=null;$('hint').classList.add('gone')};
+let rest=0;
+const start=()=>{idle=false;goal=null;clearTimeout(rest);$('hint').classList.add('gone')};
+/* spin again a few seconds after the last touch, unless zoomed in to look closely */
+const resume=ms=>{clearTimeout(rest);rest=setTimeout(()=>{if(!touches.size&&zoom<2)idle=true},ms)};
+const turn=()=>{yaw=home.yaw+Math.atan2(Math.sin(yaw-home.yaw),Math.cos(yaw-home.yaw))};
 cv.onpointerdown=e=>{start();cv.setPointerCapture(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY,e.shiftKey]);if(touches.size===1){moved=0;two=false}else two=true};
 cv.onpointermove=e=>{const o=touches.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];moved+=Math.abs(dx)+Math.abs(dy);
   if(touches.size===1){if(o[2])pan(dx,dy);else{yaw+=dx*.008;pitch=Math.max(0,Math.min(1.55,pitch+dy*.006))}}
@@ -118,14 +122,15 @@ cv.onpointermove=e=>{const o=touches.get(e.pointerId);if(!o)return;const dx=e.cl
     if(before>10)zoomAt(after/before,(e.clientX+other[0])/2,(e.clientY+other[1])/2);pan(dx/2,dy/2)}
   o[0]=e.clientX;o[1]=e.clientY;dirty=true};
 cv.onpointerup=e=>{if(touches.size===1&&!two&&moved<8)pick(e.clientX,e.clientY);touches.delete(e.pointerId)};
-cv.onpointercancel=e=>touches.delete(e.pointerId);
-cv.addEventListener('wheel',e=>{e.preventDefault();start();zoomAt(Math.exp(-e.deltaY*.0015),e.clientX,e.clientY)},{passive:false});
+cv.onpointercancel=e=>{touches.delete(e.pointerId);resume(4000)};
+cv.addEventListener('pointerup',()=>resume(4000));
+cv.addEventListener('wheel',e=>{e.preventDefault();start();zoomAt(Math.exp(-e.deltaY*.0015),e.clientX,e.clientY);resume(4000)},{passive:false});
 
 const n=meta.parts.length;
 function label(){const p=meta.parts[sel];$('part').textContent=p?p.name:'All parts';$('note').textContent=p?p.line:'Tap a part to light it up.';dirty=true}
-const step=d=>{start();sel=(sel+1+d+n+1)%(n+1)-1;label()};
+const step=d=>{start();idle=true;sel=(sel+1+d+n+1)%(n+1)-1;label()};
 $('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);
-$('fit').onclick=()=>{start();sel=-1;label();goal={...home,t:[0,0,0]}};
+$('fit').onclick=()=>{start();turn();sel=-1;label();goal={...home,t:[0,0,0]};idle=true};
 
 function use(){const S=scale();gl.useProgram(solid.p);gl.uniformMatrix3fv(solid.u('R'),false,col(matrix()));
   gl.uniform3fv(solid.u('target'),target);gl.uniform2f(solid.u('S'),S[0],S[1]);gl.uniform2f(solid.u('shift'),0,shiftY());gl.uniform1f(solid.u('soft'),which==='hela'?1:0)}
@@ -163,7 +168,7 @@ function render(){
 function frame(){
   if(goal){const k=.14;yaw+=(goal.yaw-yaw)*k;pitch+=(goal.pitch-pitch)*k;zoom+=(goal.zoom-zoom)*k;target=target.map((v,i)=>v+(goal.t[i]-v)*k);dirty=true;
     if(Math.abs(zoom-goal.zoom)<.002&&Math.abs(yaw-goal.yaw)<.002)goal=null}
-  if(idle&&!calm){yaw+=.0016;dirty=true}
+  if(idle&&!goal&&!calm){yaw+=.0016;dirty=true}
   if(dirty){dirty=false;render();
     const um=meta.um*2/scale()[0];$('depth').textContent=um<10?um.toFixed(1):Math.round(um)}
   requestAnimationFrame(frame);
