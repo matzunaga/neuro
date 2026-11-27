@@ -2,13 +2,18 @@
 const $=id=>document.getElementById(id),cv=$('field'),main=document.querySelector('main');
 $('about').onclick=()=>{const o=$('credit').hidden;$('credit').hidden=!o;$('about').setAttribute('aria-expanded',o);main.classList.toggle('open',o)};
 $('closeCredit').onclick=()=>$('about').click();
+const which=new URLSearchParams(location.search).get('cell')==='jurkat'?'jurkat':'hela';
+const dir=which==='jurkat'?'data/jurkat/':'data/';
+document.querySelector('[data-cell='+which+'].pickcell').setAttribute('aria-current','page');
+document.querySelectorAll('[data-only]').forEach(e=>e.hidden=e.dataset.only!==which);
+if(which==='jurkat')document.querySelector('h1 .eyebrow').textContent='Human T cell';
 const fail=()=>{$('offline').hidden=false;$('part').textContent=''};
 const gl=cv.getContext('webgl2',{alpha:true,antialias:true,premultipliedAlpha:true});
 let meta,data;
 try{
   if(!gl)throw 0;
-  meta=await fetch('data/meta.json?v=2').then(r=>r.json());
-  const r=await fetch('data/mesh.bin.gz?v=2');if(!r.ok)throw 0;
+  meta=await fetch(dir+'meta.json?v=3').then(r=>r.json());
+  const r=await fetch(dir+'mesh.bin.gz?v=3');if(!r.ok)throw 0;
   data=await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
 }catch(e){return fail()}
 

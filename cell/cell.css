@@ -7,3 +7,11 @@
 .cell-app .credit{max-height:64vh}
 .cell-app .credit dl{grid-template-columns:1fr;gap:.2rem}
 .cell-app .credit dd{margin-bottom:.6rem}
+.cell-app h1{position:relative;display:inline-block}
+.cell-app h1 .rest{position:static}
+.cell-app h1 .eyebrow{left:50%;transform:translateX(-50%);padding-left:.16em}
+.cell-app .topright{text-align:right}
+.cell-app .cells{display:flex;justify-content:flex-end;gap:1rem;margin-top:.9rem;pointer-events:auto}
+.cell-app .pickcell{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:#282828;text-decoration:none;padding:.35rem 0;opacity:.65}
+.cell-app .pickcell[aria-current]{opacity:1;border-bottom:2px solid #fff}
+.cell-app [hidden]{display:none}
