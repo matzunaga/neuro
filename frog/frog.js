@@ -90,10 +90,20 @@ function silhouette(c,pose){c.fillStyle='#003a52';for(const l of limbs(pose)){c.
 /* choreography */
 const SIT=.55,CROUCH=.2,AIR=.56,LAND=.22,BEAT=SIT+CROUCH+AIR+LAND,GAP=1.4;
 let W,H,dpr,S,hops=[],total,start=null;
+let side=-1;
+/* every run enters from a different edge, at a random spot and angle, and leaves across the screen */
 function plan(){
-  const reach=Math.max(150*S,Math.min(W*.36,330*S)),from=-175*S,to=W+185*S,n=Math.ceil((to-from)/reach),step=(to-from)/n;
-  const ys=i=>H*.52+Math.sin(i*2.1)*H*.045;
-  hops=[];for(let i=0;i<n;i++)hops.push({x0:from+i*step,y0:ys(i),x1:from+(i+1)*step,y1:ys(i+1),sit:i===0?0:i===Math.ceil(n/2)?SIT*2.2:SIT*.7});
+  const m=185*S,e=Math.floor(Math.random()*3);side=side<0?Math.floor(Math.random()*4):(side+1+e)%4; /* 0 left, 1 top, 2 right, 3 bottom; never the same twice */
+  const u=.2+Math.random()*.6,v=.2+Math.random()*.6;
+  const A=[[-m,H*u],[W*u,-m],[W+m,H*u],[W*u,H+m]][side];
+  const Px=W*(.35+Math.random()*.3),Py=H*(.35+Math.random()*.3);
+  let dx=Px-A[0],dy=Py-A[1];const d=Math.hypot(dx,dy);dx/=d;dy/=d;
+  /* carry the line on until it is fully off screen again */
+  const out=Math.min(dx>0?(W+m-A[0])/dx:dx<0?(-m-A[0])/dx:1e9,dy>0?(H+m-A[1])/dy:dy<0?(-m-A[1])/dy:1e9);
+  const reach=Math.max(150*S,Math.min(Math.min(W,H)*.36,330*S)),n=Math.max(3,Math.ceil(out/reach));
+  const at=i=>{const k=out*i/n,w=i>0&&i<n?Math.sin(i*2.1+u*6)*Math.min(W,H)*.06:0;return[A[0]+dx*k-dy*w,A[1]+dy*k+dx*w]};
+  const mid=Math.max(1,Math.min(n-1,Math.round(d/out*n)));
+  hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*.7})}
   let t=.35;for(const h of hops){h.t=t;t+=h.sit+CROUCH+AIR+LAND}total=t+GAP;
 }
 function state(t){
@@ -129,13 +139,13 @@ function size(){dpr=Math.min(devicePixelRatio||1,3);W=cv.clientWidth;H=cv.client
 const frozen=new URLSearchParams(location.search).get('t');
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 let playing=!calm;
-cv.onpointerdown=()=>{playing=true;start=null};
+cv.onpointerdown=()=>{playing=true;start=null;plan()};
 addEventListener('resize',()=>{size();start=null});
 size();
 function frame(now){
   if(frozen!==null)paint(state(+frozen));
   else if(playing){if(start===null)start=now;let t=(now-start)/1000;
-    if(t>total){start=now;t=0;if(calm)playing=false}paint(state(t))}
+    if(t>total){start=now;t=0;plan();if(calm)playing=false}paint(state(t))}
   else paint({x:W/2,y:H*.52,a:0,z:0,sx:1,sy:1,pose:{hind:0,tuck:0,reach:0}});
   requestAnimationFrame(frame);
 }
