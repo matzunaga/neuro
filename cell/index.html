@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Cell — one human HeLa cell scan, from open data</title>
+<meta name="description" content="A HeLa cell, from cells taken from Henrietta Lacks without her consent, rebuilt in 3D from an open electron microscope scan.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css?v=36">
+<link rel="stylesheet" href="cell.css?v=2">
+</head>
+<body>
+<main class="neuron-app cell-app">
+  <canvas id="field" aria-label="A HeLa cell in 3D. Drag to turn, pinch to zoom, tap a part."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="masthead"><h1>C<span class="rest">ell<span class="eyebrow">Human HeLa cell</span></span></h1></header>
+  <div class="topright"><button class="link" id="about" aria-expanded="false" aria-controls="credit">About this cell</button></div>
+  <section class="reading" aria-live="polite">
+    <p class="location">View width</p>
+    <div class="primary-reading"><span class="length" id="depth">—</span><span class="unit">microns</span></div>
+    <p class="part" id="part">Loading</p><p class="trend" id="note"></p>
+  </section>
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">About and credit</p>
+    <dl>
+      <dt>Henrietta Lacks</dt><dd>HeLa cells come from Henrietta Lacks, a Black American mother of five. In 1951, during treatment for cervical cancer at Johns Hopkins, cells from her tumor were taken for research without her knowledge or consent. She died that year, at 31. Her cells are still grown and studied around the world. <a href="https://www.hopkinsmedicine.org/henrietta-lacks">Johns Hopkins on her story</a>.</dd>
+      <dt>Cell</dt><dd>A cancer cell, not a healthy one. Wild-type HeLa (ATCC CCL-2) in interphase, the stage between divisions.</dd>
+      <dt>Scan</dt><dd>Focused ion beam scanning electron microscopy, 2017. The block is about 48 by 6 by 33 microns and may cut off the cell or include parts of neighbors.</dd>
+      <dt>Data</dt><dd>jrc_hela-2, Janelia Research Campus, HHMI, via <a href="https://openorganelle.janelia.org/datasets/jrc_hela-2">OpenOrganelle</a>. Scan <a href="https://doi.org/10.25378/janelia.13114211">DOI 10.25378/janelia.13114211</a>.</dd>
+      <dt>People</dt><dd>Sample: Aubrey Weigel. Preparation: Gleb Shtengel. Imaging: C. Shan Xu. COSEM / CellMap project teams.</dd>
+      <dt>Papers</dt><dd>Heinrich et al., <i>Whole-cell organelle segmentation in volume electron microscopy</i>, Nature 2021. Xu et al., <i>An open-access volume electron microscopy atlas of whole cells and tissues</i>, Nature 2021.</dd>
+      <dt>License</dt><dd><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, as listed on the <a href="https://registry.opendata.aws/janelia-cosem/">AWS open data registry</a>.</dd>
+      <dt>Changes</dt><dd>The published 3D surfaces were heavily simplified for phones, and flat faces at the edge of the block were removed. Only the largest 2,500 vesicle pieces, 1,200 endosome pieces and 700 microtubule pieces are shown.</dd>
+      <dt>Accuracy</dt><dd>The parts were labeled by software trained on hand-labeled samples, so some labels are wrong or incomplete.</dd>
+      <dt>Drawing</dt><dd>Color, lighting, shadow, blur and see-through surfaces are design choices. An electron microscope sees no color.</dd>
+    </dl>
+    <p class="fine">For illustration only. Not for medical or research use.</p>
+  </aside>
+  <footer class="footer"><span class="controls"><button class="link" id="prev" aria-label="Previous part">Prev</button><span>Part</span><button class="link" id="next" aria-label="Next part">Next</button></span><button class="link" id="fit">Whole</button></footer>
+  <p class="hint" id="hint">Drag to turn &middot; pinch to zoom &middot; tap a part</p>
+  <p class="offline-notice" id="offline" hidden>Could not load the cell data. Try again in a moment.</p>
+  <noscript><p class="no-script">Cell needs JavaScript enabled.</p></noscript>
+</main>
+<script src="cell.js?v=2"></script>
+</body>
+</html>

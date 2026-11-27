@@ -1,0 +1,9 @@
+.cell-app .hint{position:absolute;z-index:3;left:0;right:0;top:calc(var(--safe-top) + 7.5rem);margin:0;text-align:center;font-size:.75rem;color:#282828;opacity:.8;transition:opacity 1.2s;pointer-events:none}
+.cell-app .hint.gone{opacity:0}
+.cell-app h1 .eyebrow{bottom:96%}
+.cell-app .length{font-size:clamp(3.5rem,15vw,6rem)}
+.cell-app .part{margin:.8rem 0 0;font-size:.95rem;color:#111;font-weight:600}
+.cell-app .trend{margin-top:.2rem;max-width:calc(100vw - 11rem)}
+.cell-app .credit{max-height:64vh}
+.cell-app .credit dl{grid-template-columns:1fr;gap:.2rem}
+.cell-app .credit dd{margin-bottom:.6rem}
