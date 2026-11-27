@@ -42,21 +42,24 @@ const prog=(v,f)=>{const p=gl.createProgram();for(const[t,s]of[[gl.VERTEX_SHADER
   if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));gl.attachShader(p,o)}
   gl.linkProgram(p);const u={};return{p,u:n=>u[n]??(u[n]=gl.getUniformLocation(p,n))}};
 const solid=prog(`layout(location=0) in vec3 p;layout(location=1) in vec3 n;
-uniform mat3 R;uniform vec3 target;uniform vec2 S,shift;out vec3 vn;out float vz;
-void main(){vec3 v=R*(p/32000.-target);vn=R*n;vz=v.z;gl_Position=vec4(v.xy*S+shift,-v.z*.5,1.);}`,
-`in vec3 vn;in float vz;uniform vec3 base;uniform float alpha;uniform int mode;out vec4 o;
+uniform mat3 R;uniform vec3 target;uniform vec2 S,shift;out vec3 vn;out float vz;out vec2 vp;
+void main(){vec3 v=R*(p/32000.-target);vn=R*n;vz=v.z;vp=p.xy/32000.;gl_Position=vec4(v.xy*S+shift,-v.z*.5,1.);}`,
+`in vec3 vn;in float vz;in vec2 vp;uniform float soft;uniform vec3 base;uniform float alpha;uniform int mode;out vec4 o;
 void main(){
+ /* HeLa runs past the scanned block: fade out before its straight edges */
+ float f=mix(1.,1.-smoothstep(.6,1.,length(vp/vec2(.97,.68))),soft);
+ if(f<(mode==2?.15:.004))discard;
  if(mode==2){o=vec4(base,1.);return;}
  vec3 n=normalize(vn);if(n.z<0.)n=-n;
  float rim=pow(1.-n.z,2.2);
- if(mode==1){float a=alpha*(.06+rim);o=vec4(base*a,a);return;}
+ if(mode==1){float a=alpha*(.06+rim)*f;o=vec4(base*a,a);return;}
  float key=max(dot(n,normalize(vec3(-.5,.65,.55))),0.),fill=max(dot(n,normalize(vec3(.8,-.2,.4))),0.);
  float spec=pow(max(dot(n,normalize(vec3(-.28,.38,.88))),0.),40.);
  vec3 shade=mix(vec3(.03,.30,.45),vec3(.30,.70,.84),clamp(.35+.5*fill+.3*n.y,0.,1.));
  vec3 c=mix(shade,base,clamp(key*.85+.08,0.,1.));
  c+=rim*.6*mix(vec3(1.),base,.35)+spec*.35;
  c*=mix(.78,1.08,clamp(vz*3.+.5,0.,1.));
- o=vec4(c,1.);}`);
+ o=vec4(c*f,f);}`);
 /* soft shadow in creases, then blur away from the focus depth */
 const post=prog(`out vec2 uv;void main(){vec2 q=vec2((gl_VertexID<<1)&2,gl_VertexID&2);uv=q;gl_Position=vec4(q*2.-1.,0.,1.);}`,
 `in vec2 uv;uniform sampler2D C,D;uniform vec2 px;uniform float zoom;out vec4 o;
@@ -125,7 +128,7 @@ $('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);
 $('fit').onclick=()=>{start();sel=-1;label();goal={...home,t:[0,0,0]}};
 
 function use(){const S=scale();gl.useProgram(solid.p);gl.uniformMatrix3fv(solid.u('R'),false,col(matrix()));
-  gl.uniform3fv(solid.u('target'),target);gl.uniform2f(solid.u('S'),S[0],S[1]);gl.uniform2f(solid.u('shift'),0,shiftY())}
+  gl.uniform3fv(solid.u('target'),target);gl.uniform2f(solid.u('S'),S[0],S[1]);gl.uniform2f(solid.u('shift'),0,shiftY());gl.uniform1f(solid.u('soft'),which==='hela'?1:0)}
 function mesh(i,mode,c,a){gl.uniform1i(solid.u('mode'),mode);gl.uniform3fv(solid.u('base'),c);gl.uniform1f(solid.u('alpha'),a);
   gl.bindVertexArray(meshes[i].vao);gl.drawElements(gl.TRIANGLES,meshes[i].count,gl.UNSIGNED_INT,0)}
 const WHITE=[.96,.99,1],RED=[.86,.13,.16];
