@@ -143,11 +143,10 @@ function state(t){
   return s;
 }
 function ring(x,y,r,w,a){if(a<=0||r<=0)return;
-  ctx.lineWidth=w;ctx.strokeStyle=`rgba(225,250,255,${a})`;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
-  ctx.strokeStyle=`rgba(0,70,100,${a*.45})`;ctx.beginPath();ctx.arc(x,y,Math.max(0,r-w*1.3),0,TAU);ctx.stroke()}
+  ctx.lineWidth=w;ctx.strokeStyle=`rgba(225,250,255,${a})`;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();}
 function splash(x,y,age,power){
   for(let i=0;i<3;i++){const q=(age-i*.17)/1.25;if(q<=0||q>=1)continue;
-    ring(x,y,S*(26+190*power*(1-Math.pow(1-q,2))),(2.6-1.7*q)*(1-i*.18),.42*Math.min(1,power*1.2)*Math.pow(1-q,1.3)*(1-i*.22))}}
+    ring(x,y,S*(26+190*power*(1-Math.pow(1-q,2))),(2.6-1.7*q)*(1-i*.18),.22*Math.min(1,power*1.2)*Math.pow(1-q,1.3)*(1-i*.22))}}
 function ripples(t){for(const h of hops){const jump=h.t+h.sit+CROUCH;splash(h.x0,h.y0,t-jump,.65);splash(h.x1,h.y1,t-jump-AIR,1)}}
 function paint(s,t){
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(t!==undefined)ripples(t);if(s.hidden)return;
