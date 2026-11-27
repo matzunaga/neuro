@@ -33,9 +33,12 @@ function limbs(pose){
     const h=chain([-30,12],HIND.fold,HIND.long,pose.hind);
     const f=pose.reach>0?chain([15,17],FRONT.tuck,FRONT.reach,pose.reach):chain([15,17],FRONT.sit,FRONT.tuck,pose.tuck);
     for(const[limb,radii,foot]of[[h,[14,9.5,6,4],[[-.62,15],[-.3,21],[0,25],[.34,29],[.78,19]]],[f,[8.5,5.5,3.6],[[-.85,11],[-.28,15],[.25,16],[.8,12]]]]){
-      const P=limb.pts.map(flip),skin=new Path2D(),tip=new Path2D();
+      /* during a turn a limb keeps its own heading: hip stays on the body, the foot stays planted until it steps */
+      const tw=pose.twist?pose.twist[side]:0,lift=pose.lift?pose.lift[side]:0,last=limb.pts.length-1;
+      const P=limb.pts.map(flip).map(([x,y],i)=>{if(!i)return[x,y];const w=i/last,c=Math.cos(tw*w),n=Math.sin(tw*w),k=1-.2*lift*w,Y=y*SLIM;
+        return[(x*c-Y*n)*k,(x*n+Y*c)*k/SLIM]}),skin=new Path2D(),tip=new Path2D();
       for(let i=0;i<P.length-1;i++)capsule(skin,P[i],radii[i],P[i+1],radii[i+1]);
-      const end=P[P.length-1],a=limb.ang[limb.ang.length-1]*side;
+      const end=P[P.length-1],a=limb.ang[limb.ang.length-1]*side+tw;
       toes(tip,end,a,foot.map(([o,l])=>[o*side,l]));
       out.push({P,skin,tip,front:radii.length===3,side});
     }
@@ -111,16 +114,20 @@ function plan(){
   const reach=Math.max(150*S,Math.min(Math.min(W,H)*.36,330*S)),n=Math.max(3,Math.ceil(out/reach));
   const at=i=>{const k=out*i/n,w=i>0&&i<n?Math.sin(i*2.1+u*6)*Math.min(W,H)*.03:0;return[A[0]+dx*k-dy*w,A[1]+dy*k+dx*w]};
   const mid=Math.max(1,Math.min(n-1,Math.round(d/out*n)));
-  hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*.9})}
+  hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*1.6})}
   let t=.35;for(const h of hops){h.t=t;t+=h.sit+CROUCH+AIR+LAND}total=t+GAP;
 }
 function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];label.textContent=M.name;plan()}
 function state(t){
   let h=hops[0];for(const q of hops)if(t>=q.t)h=q;
   const k=Math.max(0,t-h.t),dir=Math.atan2(h.y1-h.y0,h.x1-h.x0);
-  const i=hops.indexOf(h),p=hops[i-1];
-  const heading=p?turnTo(Math.atan2(p.y1-p.y0,p.x1-p.x0),dir,ease((k-.08)/(h.sit+CROUCH*.6-.08))):dir;
-  const s={x:h.x0,y:h.y0,a:heading,z:0,sx:1,sy:1,pose:{hind:0,tuck:0,reach:0},hidden:t<h.t};
+  /* turn in three steps: the legs on the turning side move first, the body follows, then the other side */
+  const i=hops.indexOf(h),p=hops[i-1],was=p?Math.atan2(p.y1-p.y0,p.x1-p.x0):dir,delta=Math.atan2(Math.sin(dir-was),Math.cos(dir-was));
+  const part=(from,to)=>h.sit?clamp((k/h.sit-from)/(to-from)):1;
+  const u1=part(.1,.4),u2=part(.34,.7),u3=part(.64,.96),heading=was+delta*ease(u2),lead=delta<0?-1:1;
+  const s={x:h.x0,y:h.y0,a:heading,z:0,sx:1,sy:1,hidden:t<h.t,pose:{hind:0,tuck:0,reach:0,
+    twist:{[lead]:was+delta*ease(u1)-heading,[-lead]:was+delta*ease(u3)-heading},
+    lift:{[lead]:p?Math.sin(Math.PI*u1):0,[-lead]:p?Math.sin(Math.PI*u3):0}}};
   const a=k-h.sit,b=a-CROUCH,c=b-AIR;
   if(a<0){s.sx=1+Math.sin(t*9)*.008;s.sy=1+Math.sin(t*9)*.018}
   else if(b<0){const u=ease(a/CROUCH);s.sx=1-.08*u;s.sy=1+.07*u}
@@ -140,7 +147,7 @@ function ring(x,y,r,w,a){if(a<=0||r<=0)return;
   ctx.strokeStyle=`rgba(0,70,100,${a*.45})`;ctx.beginPath();ctx.arc(x,y,Math.max(0,r-w*1.3),0,TAU);ctx.stroke()}
 function splash(x,y,age,power){
   for(let i=0;i<3;i++){const q=(age-i*.17)/1.25;if(q<=0||q>=1)continue;
-    ring(x,y,S*(26+190*power*(1-Math.pow(1-q,2))),(2.6-1.7*q)*(1-i*.18),.95*Math.min(1,power*1.2)*Math.pow(1-q,1.3)*(1-i*.22))}}
+    ring(x,y,S*(26+190*power*(1-Math.pow(1-q,2))),(2.6-1.7*q)*(1-i*.18),.42*Math.min(1,power*1.2)*Math.pow(1-q,1.3)*(1-i*.22))}}
 function ripples(t){for(const h of hops){const jump=h.t+h.sit+CROUCH;splash(h.x0,h.y0,t-jump,.65);splash(h.x1,h.y1,t-jump-AIR,1)}}
 function paint(s,t){
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(t!==undefined)ripples(t);if(s.hidden)return;
