@@ -12,8 +12,8 @@ const gl=cv.getContext('webgl2',{alpha:true,antialias:true,premultipliedAlpha:tr
 let meta,data;
 try{
   if(!gl)throw 0;
-  meta=await fetch(dir+'meta.json?v=4').then(r=>r.json());
-  const r=await fetch(dir+'mesh.bin.gz?v=4');if(!r.ok)throw 0;
+  meta=await fetch(dir+'meta.json?v=5').then(r=>r.json());
+  const r=await fetch(dir+'mesh.bin.gz?v=5');if(!r.ok)throw 0;
   data=await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
 }catch(e){return fail()}
 
