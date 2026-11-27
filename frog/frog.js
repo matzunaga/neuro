@@ -1,7 +1,14 @@
 (function(){
 const cv=document.getElementById('field'),ctx=cv.getContext('2d');
 const shade=document.createElement('canvas'),sx=shade.getContext('2d');
-const YEL='#ffe21a',INK='#0d0d0f',TAU=Math.PI*2;
+const INK='#0d0d0f',TAU=Math.PI*2;
+/* colour forms of real poison frogs: body, back marking, back spots, leg skin, leg marking, leg spots */
+const MORPHS=[
+  {name:'Yellow-banded',body:INK,mark:'#ffe21a',spot:INK,leg:INK,patch:'#ffe21a',dot:INK},
+  {name:'Strawberry',body:'#d92c1c',mark:'#f0452b',spot:'#3a0d0a',leg:'#172a78',patch:'#3155c4',dot:'#0b1238'},
+  {name:'Green and black',body:INK,mark:'#52e39a',spot:INK,leg:INK,patch:'#52e39a',dot:INK},
+  {name:'Golden',body:'#e9a800',mark:'#ffd21f',spot:'#f3b90c',leg:'#e9a800',patch:'#ffd21f',dot:'#f3b90c'}];
+let M=MORPHS[0];
 const clamp=v=>Math.max(0,Math.min(1,v)),ease=v=>{v=clamp(v);return v*v*(3-2*v)},mix=(a,b,t)=>a+(b-a)*t;
 const turnTo=(a,b,t)=>a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*t;
 
@@ -51,24 +58,24 @@ function band(c,x0,x1,w){c.beginPath();
 function drawFrog(c,pose){
   const L=limbs(pose);
   for(const l of L){
-    c.fillStyle=INK;c.fill(l.skin);c.fill(l.tip);
+    c.fillStyle=M.leg;c.fill(l.skin);c.fill(l.tip);
     c.save();c.clip(l.skin);
     const P=l.P,spot=(i,t,rx,ry,col,off=0)=>{const a=P[i],b=P[i+1],r=Math.atan2(b[1]-a[1],b[0]-a[0]);
       c.fillStyle=col;blob(c,mix(a[0],b[0],t)-Math.sin(r)*off,mix(a[1],b[1],t)+Math.cos(r)*off,rx,ry,r)};
-    if(l.front){spot(0,.7,10,7,YEL);spot(1,.4,7,4.5,YEL);spot(0,.75,3.2,2.6,INK,1)}
-    else{spot(0,.55,18,12,YEL);spot(1,.5,17,7,YEL);spot(2,.35,8,4,YEL);
-      spot(0,.45,5,4,INK,3);spot(0,.75,3,3.4,INK,-5);spot(1,.38,4.5,3.6,INK,1);spot(1,.68,3,2.6,INK,-2)}
+    if(l.front){spot(0,.7,10,7,M.patch);spot(1,.4,7,4.5,M.patch);spot(0,.75,3.2,2.6,M.dot,1)}
+    else{spot(0,.55,18,12,M.patch);spot(1,.5,17,7,M.patch);spot(2,.35,8,4,M.patch);
+      spot(0,.45,5,4,M.dot,3);spot(0,.75,3,3.4,M.dot,-5);spot(1,.38,4.5,3.6,M.dot,1);spot(1,.68,3,2.6,M.dot,-2)}
     /* rounded form: dark under edge, soft top light */
     c.lineJoin='round';c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=3;c.stroke(l.skin);
     for(let i=0;i<P.length-1;i++){c.strokeStyle='rgba(255,255,255,.16)';c.lineCap='round';c.lineWidth=l.front?2.4:3.6;
       c.beginPath();c.moveTo(P[i][0]-1.5,P[i][1]-2);c.lineTo(P[i+1][0]-1.5,P[i+1][1]-2);c.stroke()}
     c.restore();
   }
-  c.fillStyle=INK;c.fill(BODY);
+  c.fillStyle=M.body;c.fill(BODY);
   c.save();c.clip(BODY);
-  c.fillStyle=YEL;band(c,17,34,1);band(c,-13,5,3.1);band(c,-41,-27,5);
-  c.fillStyle=YEL;blob(c,46,0,3.6,5);
-  c.fillStyle=INK;
+  c.fillStyle=M.mark;band(c,17,34,1);band(c,-13,5,3.1);band(c,-41,-27,5);
+  blob(c,46,0,3.6,5);
+  c.fillStyle=M.spot;
   for(const[x,y,rx,ry,r]of[[27,7,4.6,3.6,.5],[24,-9,3.6,3,-.4],[-3,10,5.4,4,.2],[-6,-8,4.2,4.8,1],[1,-1,2,2.4,0],[-34,5,3.8,3,-.6],[-33,-7,2.8,2.4,.3]])blob(c,x,y,rx,ry,r);
   const edge=c.createRadialGradient(0,0,8,0,0,52);edge.addColorStop(0,'rgba(0,0,0,0)');edge.addColorStop(1,'rgba(0,0,0,.5)');
   c.save();c.scale(1,.55);c.fillStyle=edge;c.fillRect(-60,-70,120,140);c.restore();
@@ -78,7 +85,7 @@ function drawFrog(c,pose){
   c.strokeStyle='rgba(0,0,0,.28)';c.lineWidth=1.2;c.beginPath();c.moveTo(34,0);c.quadraticCurveTo(0,2,-40,0);c.stroke();
   c.restore();
   for(const s of[1,-1]){
-    c.fillStyle=INK;blob(c,31,17.5*s,8.8,7.6,.25*s);
+    c.fillStyle=M.body;blob(c,31,17.5*s,8.8,7.6,.25*s);
     const g=c.createRadialGradient(33,18*s-2.5,.5,31,18*s,7);g.addColorStop(0,'#5a5148');g.addColorStop(.55,'#161312');g.addColorStop(1,'#000');
     c.fillStyle=g;blob(c,31.5,18.2*s,6.6,5.8,.25*s);
     c.fillStyle='#fff';blob(c,33.5,18.2*s-2.4,1.9,1.5);
@@ -106,6 +113,7 @@ function plan(){
   hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*.7})}
   let t=.35;for(const h of hops){h.t=t;t+=h.sit+CROUCH+AIR+LAND}total=t+GAP;
 }
+function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];label.textContent=M.name;plan()}
 function state(t){
   let h=hops[0];for(const q of hops)if(t>=q.t)h=q;
   const k=Math.max(0,t-h.t),dir=Math.atan2(h.y1-h.y0,h.x1-h.x0);
@@ -135,17 +143,18 @@ function paint(s){
   ctx.translate(s.x,s.y);const g=S*(1+.42*s.z);ctx.scale(g,g);ctx.rotate(s.a);ctx.scale(s.sx,s.sy);drawFrog(ctx,s.pose);
 }
 function size(){dpr=Math.min(devicePixelRatio||1,3);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
-  S=Math.min(W*.0026,H*.0017,1.7);plan()}
+  S=Math.min(W*.0026,H*.0017,1.7)*.5;plan()}
+const label=document.getElementById('morph');
 const frozen=new URLSearchParams(location.search).get('t');
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 let playing=!calm;
-cv.onpointerdown=()=>{playing=true;start=null;plan()};
+cv.onpointerdown=()=>{if(playing)next();else plan();playing=true;start=null};
 addEventListener('resize',()=>{size();start=null});
 size();
 function frame(now){
   if(frozen!==null)paint(state(+frozen));
   else if(playing){if(start===null)start=now;let t=(now-start)/1000;
-    if(t>total){start=now;t=0;plan();if(calm)playing=false}paint(state(t))}
+    if(t>total){start=now;t=0;next();if(calm)playing=false}paint(state(t))}
   else paint({x:W/2,y:H*.52,a:0,z:0,sx:1,sy:1,pose:{hind:0,tuck:0,reach:0}});
   requestAnimationFrame(frame);
 }
