@@ -63,14 +63,14 @@ function build(data){
   const place=(m,start,from)=>{
     const far=[start],ids=[from];
     for(let i=1;i<m.P.length;i++){const d=len(sub(m.P[i],m.P[i-1]));far.push(far[i-1]+d);
-      if(m.axon){const node={p:m.P[i],r:m.Q[i],d,up:ids[i-1],kids:[]};ids.push(nodes.push(node)-1);if(ids[i-1]>=0)nodes[ids[i-1]].kids.push(ids[i]);else firsts.push(ids[i])}
+      if(m.axon){const node={from:m.P[i-1],p:m.P[i],r:m.Q[i],d,up:ids[i-1],kids:[]};ids.push(nodes.push(node)-1);if(ids[i-1]>=0)nodes[ids[i-1]].kids.push(ids[i]);else firsts.push(ids[i])}
       else ids.push(-1)}
     m.raw.forEach((p,i)=>{const k=(m.axon?'a':'d')+key(p);if(!known.has(k))known.set(k,[far[m.at[i]],ids[m.at[i]]])});
     maxFar[m.axon?1:0]=Math.max(maxFar[m.axon?1:0],far[far.length-1]);
     tube(m.P,m.Q,m.axon?1:0,far);
   };
   while(moved){moved=false;left=left.filter(m=>{
-    const hit=known.get((m.axon?'a':'d')+key(m.raw[0]));
+    const k=key(m.raw[0]),own=known.get((m.axon?'a':'d')+k),other=known.get((m.axon?'d':'a')+k),hit=own||(other&&[other[0],-1]);
     if(!m.atBody&&!hit)return true;
     m.atBody?place(m,0,-1):place(m,hit[0],hit[1]);moved=true;return false})}
   for(const m of left)place(m,len(m.raw[0]),-1);
@@ -114,7 +114,7 @@ function travel(dt){
     let n=nodes[b.id];
     while(b.out&&b.x>n.d){b.x-=n.d;b.id=n.kids.length?pick(n.kids):pick(firsts);n=nodes[b.id]}
     while(!b.out&&b.x<0){if(n.up>=0){b.id=n.up;n=nodes[b.id];b.x+=n.d}else{b.id=pick(ends);n=nodes[b.id];b.x+=n.d}}
-    const from=n.up>=0?nodes[n.up].p:[0,0,0],t=n.d?clamp(b.x/n.d):1;
+    const from=n.from,t=n.d?clamp(b.x/n.d):1;
     for(let k=0;k<3;k++)beadData[i*5+k]=from[k]+(n.p[k]-from[k])*t;
     beadData[i*5+3]=Math.min(n.r,1.4);beadData[i*5+4]=b.out?1:0;
   });
@@ -163,17 +163,18 @@ void main(){vec3 q=rot*(p.xyz-target);float r=max(p.w*1.25,1.);fade=smoothstep(-
  vec3 base=w>.5?vec3(.90,.12,.10):vec3(.16,.16,.16);vec3 col=base*(.55+.7*l)+pow(l,12.)*.4;
  o=vec4(mix(col,vec3(.06,.68,.85),fade),1.);}`);
 const U=(p,n)=>gl.getUniformLocation(p,n);
+const buffers=[],buffer=()=>{const b=gl.createBuffer();buffers.push(b);return b};
 let count=0,nSpecks=170,vao,svao,bvao,bbuf,box;
 function upload(){
   vao=gl.createVertexArray();gl.bindVertexArray(vao);
-  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER,buffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
   [[0,3,0],[1,3,12],[2,1,24],[3,1,28]].forEach(([i,n,o])=>{gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,n,gl.FLOAT,false,32,o)});
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(I),gl.STATIC_DRAW);count=I.length;
-  load();bvao=gl.createVertexArray();gl.bindVertexArray(bvao);bbuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bbuf);gl.bufferData(gl.ARRAY_BUFFER,beadData.byteLength,gl.DYNAMIC_DRAW);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,buffer());gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(I),gl.STATIC_DRAW);count=I.length;
+  beads=[];ends=null;load();bvao=gl.createVertexArray();gl.bindVertexArray(bvao);bbuf=buffer();gl.bindBuffer(gl.ARRAY_BUFFER,bbuf);gl.bufferData(gl.ARRAY_BUFFER,beadData.byteLength,gl.DYNAMIC_DRAW);
   gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,4,gl.FLOAT,false,20,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,1,gl.FLOAT,false,20,16);
   let s=7;const rnd=()=>(s=s*16807%2147483647)/2147483647,P=[];
   for(let i=0;i<nSpecks;i++)P.push((rnd()-.5)*800,(rnd()-.5)*800,(rnd()-.5)*500,rnd());
-  svao=gl.createVertexArray();gl.bindVertexArray(svao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);
+  svao=gl.createVertexArray();gl.bindVertexArray(svao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);
   gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,4,gl.FLOAT,false,0,0);
 }
 /* camera: zooming in moves the aim from the middle of the tree to the cell body */
@@ -217,8 +218,27 @@ cv.onpointerup=cv.onpointercancel=e=>{touches.delete(e.pointerId);pinch=0;if(!to
 cv.addEventListener('wheel',e=>{e.preventDefault();idle=false;setZoom(zoom*Math.exp(-e.deltaY*.0015));resume()},{passive:false});
 $('close').onclick=()=>{goal=9;idle=true};
 $('fit').onclick=()=>{goal=1;idle=true};
-fetch('data/cell.json?v=1').then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{box=build(d);upload();
-  const z=+new URLSearchParams(location.search).get('z');if(z){zoom=z;idle=false}
-  console.log('beads',beads.length,'loose',loose,'far',maxFar.map(Math.round).join('/'));
-  requestAnimationFrame(render)}).catch(e=>{console.error(e);fail()});
+/* one cell at a time */
+let cells=[],at=0,ask=0,running=false;
+const free=()=>{for(const v of[vao,svao,bvao])if(v)gl.deleteVertexArray(v);for(const b of buffers.splice(0))gl.deleteBuffer(b)};
+function describe(c){
+  $('which').textContent=c.region.replace(/^./,m=>m.toUpperCase())+' · '+c.cell_type.toLowerCase();
+  $('count').textContent=(at+1)+' / '+cells.length;
+  $('what').textContent='One reconstructed human neuron, '+c.name+', from the '+c.region+'. The database lists it as: '+c.cell_type.toLowerCase()+'. Cell '+(at+1)+' of '+cells.length+' on this page.';
+  $('tissue').textContent=c.tissue+'. Tissue removed during a patient\u2019s surgery and donated to research.';
+  $('record').href=c.link;
+}
+function show(i){
+  at=(i+cells.length)%cells.length;const c=cells[at],mine=++ask;
+  fetch('data/'+c.id+'.json?v=1').then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{
+    if(mine!==ask)return;
+    $('offline').hidden=true;free();V.length=I.length=nodes.length=firsts.length=0;maxFar[0]=maxFar[1]=0;seed=11;
+    box=build(d);upload();describe(c);zoom=1.15;goal=null;idle=true;
+    const z=+new URLSearchParams(location.search).get('z');if(z&&!running){zoom=z;idle=false}
+    console.log(c.id,'beads',beads.length,'loose',loose,'verts',V.length/8);
+    if(!running){running=true;requestAnimationFrame(render)}
+  }).catch(e=>{console.error(e);fail()});
+}
+$('prev').onclick=()=>show(at-1);$('next').onclick=()=>show(at+1);
+fetch('data/cells.json?v=1').then(r=>{if(!r.ok)throw 0;return r.json()}).then(list=>{cells=list;show((+new URLSearchParams(location.search).get('c')||1)-1)}).catch(e=>{console.error(e);fail()});
 })();

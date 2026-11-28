@@ -1,0 +1,194 @@
+[
+{
+"id": "allen-508298270",
+"name": "H16.06.004.01.04.05",
+"region": "middle temporal gyrus, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/508298270"
+},
+{
+"id": "allen-571735073",
+"name": "H17.06.006.11.09.08",
+"region": "middle temporal gyrus, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571735073"
+},
+{
+"id": "allen-527941296",
+"name": "H16.06.008.01.25.03",
+"region": "middle temporal gyrus, layer 5",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/527941296"
+},
+{
+"id": "allen-571430815",
+"name": "H17.06.005.13.05.02",
+"region": "middle temporal gyrus, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571430815"
+},
+{
+"id": "allen-643582610",
+"name": "H17.06.013.12.03.03",
+"region": "planum polare, layer 3",
+"cell_type": "Aspiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/643582610"
+},
+{
+"id": "allen-508421103",
+"name": "H16.06.004.02.05.02",
+"region": "middle temporal gyrus, layer 2",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/508421103"
+},
+{
+"id": "allen-576084692",
+"name": "H17.06.007.11.06.01",
+"region": "middle frontal gyrus, layer 3",
+"cell_type": "Aspiny dendrites",
+"tissue": "Neurosurgical tissue (tumor)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/576084692"
+},
+{
+"id": "allen-569821470",
+"name": "H17.03.002.11.06.03",
+"region": "middle temporal gyrus, layer 5",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/569821470"
+},
+{
+"id": "allen-596028822",
+"name": "H17.06.009.11.04.03",
+"region": "middle temporal gyrus, layer 1",
+"cell_type": "Aspiny dendrites",
+"tissue": "Neurosurgical tissue (tumor)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/596028822"
+},
+{
+"id": "allen-545604343",
+"name": "H16.03.010.13.05.01",
+"region": "middle temporal gyrus, layer 3",
+"cell_type": "Aspiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/545604343"
+},
+{
+"id": "allen-601958555",
+"name": "H17.03.010.11.13.06",
+"region": "middle temporal gyrus, layer 4",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/601958555"
+},
+{
+"id": "allen-571654895",
+"name": "H17.06.006.11.08.04",
+"region": "middle temporal gyrus, layer 2",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571654895"
+},
+{
+"id": "allen-571642127",
+"name": "H17.06.006.11.10.02",
+"region": "middle temporal gyrus, layer 5",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571642127"
+},
+{
+"id": "allen-526800653",
+"name": "H16.03.005.01.09.04",
+"region": "temporal lobe, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/526800653"
+},
+{
+"id": "allen-571718621",
+"name": "H17.06.006.11.08.08",
+"region": "middle temporal gyrus, layer 2",
+"cell_type": "Sparsely spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571718621"
+},
+{
+"id": "allen-571464200",
+"name": "H17.06.005.12.10.07",
+"region": "middle temporal gyrus, layer 2",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571464200"
+},
+{
+"id": "allen-571471295",
+"name": "H17.06.005.12.15.04",
+"region": "middle temporal gyrus, layer 5",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/571471295"
+},
+{
+"id": "allen-541563728",
+"name": "H16.03.007.01.01.08.07",
+"region": "middle temporal gyrus, layer 2",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/541563728"
+},
+{
+"id": "allen-601927090",
+"name": "H17.03.010.11.13.01",
+"region": "middle temporal gyrus, layer 3",
+"cell_type": "Aspiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/601927090"
+},
+{
+"id": "allen-548408551",
+"name": "H16.06.012.11.06.01",
+"region": "middle frontal gyrus, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (tumor)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/548408551"
+},
+{
+"id": "allen-595999306",
+"name": "H17.06.009.11.04.01",
+"region": "middle temporal gyrus, layer 1",
+"cell_type": "Sparsely spiny dendrites",
+"tissue": "Neurosurgical tissue (tumor)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/595999306"
+},
+{
+"id": "allen-531526539",
+"name": "H16.06.007.01.07.04",
+"region": "frontal lobe, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (tumor)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/531526539"
+},
+{
+"id": "allen-528602977",
+"name": "H16.06.009.01.01.06.01",
+"region": "middle temporal gyrus, layer 2",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/528602977"
+},
+{
+"id": "allen-508305938",
+"name": "H16.06.004.02.10.01",
+"region": "middle temporal gyrus, layer 3",
+"cell_type": "Spiny dendrites",
+"tissue": "Neurosurgical tissue (epilepsy)",
+"link": "https://celltypes.brain-map.org/experiment/morphology/508305938"
+}
+]
