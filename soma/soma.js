@@ -127,7 +127,7 @@ vec4 project(vec3 q){float z=dist-q.z;return vec4(q.x*focal/view.x*2.,q.y*focal/
 const solid=program(CAMERA+`layout(location=0) in vec3 p;layout(location=1) in vec3 n;layout(location=2) in float k;layout(location=3) in float s;
 out vec3 vn,vq,vp,vm;out float vk,vs;uniform float inward,outward;
 void main(){float front=k>.5?outward:inward,g=(s-front)/30.,swell=front<0.?0.:exp(-g*g)*smoothstep(10.,40.,s);
- vq=rot*(p+n*swell*2.2-target);vn=rot*n;vp=p;vm=n;vk=k;vs=s;gl_Position=project(vq);}`,
+ vq=rot*(p+n*swell*.4-target);vn=rot*n;vp=p;vm=n;vk=k;vs=s;gl_Position=project(vq);}`,
 `in vec3 vn,vq,vp,vm;in float vk,vs;uniform float dist,span,inward,outward,body;uniform mat3 rot;out vec4 o;
 float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.17,.13));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
