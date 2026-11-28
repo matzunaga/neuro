@@ -29,7 +29,7 @@ function limbs(pose){
   for(const side of[1,-1]){
     const flip=q=>[q[0],q[1]*side];
     const h=chain([-30,12],HIND.fold,HIND.long,pose.hind);
-    const f=pose.reach>0?chain([15,17],FRONT.tuck,FRONT.reach,pose.reach):chain([15,17],FRONT.sit,FRONT.tuck,pose.tuck);
+    const f=pose.reach>0?chain([15,17],pose.land?FRONT.sit:FRONT.tuck,FRONT.reach,pose.reach):chain([15,17],FRONT.sit,FRONT.tuck,pose.tuck);
     for(const[limb,radii,foot]of[[h,[14,9.5,6,4],[[-.62,15],[-.3,21],[0,25],[.34,29],[.78,19]]],[f,[8.5,5.5,3.6],[[-.85,11],[-.28,15],[.25,16],[.8,12]]]]){
       /* during a turn a limb keeps its own heading: hip stays on the body, the foot stays planted until it steps */
       const tw=pose.twist?pose.twist[side]:0,lift=pose.lift?pose.lift[side]:0,last=limb.pts.length-1;
@@ -96,7 +96,7 @@ function drawFrog(c,pose){
 function silhouette(c,pose){c.fillStyle='#003a52';for(const l of limbs(pose)){c.fill(l.skin);c.fill(l.tip)}c.fill(BODY);blob(c,31,17.5,9,8);blob(c,31,-17.5,9,8)}
 
 /* choreography */
-const SIT=.55,CROUCH=.2,AIR=.56,LAND=.22,BEAT=SIT+CROUCH+AIR+LAND,GAP=1.4;
+const SIT=.55,CROUCH=.2,AIR=.56,LAND=.34,BEAT=SIT+CROUCH+AIR+LAND,GAP=1.4;
 let W,H,dpr,S,hops=[],total,start=null;
 let side=-1;
 /* every run enters from a different edge, at a random spot and angle, and leaves across the screen */
@@ -136,7 +136,7 @@ function state(t){
     const st=Math.sin(Math.PI*clamp(u/.45));const off=1-ease(u/.14);s.sx=1+.1*st-.08*off;s.sy=1-.07*st+.07*off}
   else{const u=clamp(c/LAND),hit=Math.sin(Math.PI*u)*(1-u*.4);
     s.x=h.x1;s.y=h.y1;s.sx=1-.13*hit;s.sy=1+.12*hit;
-    s.pose.reach=1-ease(u*2);s.pose.tuck=1-ease((u-.5)*2)}
+    s.pose.land=true;s.pose.reach=1-ease(u)}
   return s;
 }
 function ring(x,y,r,w,a){if(a<=0||r<=0)return;
