@@ -13,7 +13,7 @@ const turnTo=(a,b,t)=>a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*t;
 
 /* The frog faces +x and is about 100 units long. Each limb is a chain of segments: [angle in degrees, length]. */
 const HIND={fold:[[42,42],[190,41],[34,30]],long:[[165,43],[188,47],[168,31]]};
-const FRONT={sit:[[100,23],[28,21]],tuck:[[140,23],[185,21]],reach:[[55,23],[2,23]]};
+const FRONT={sit:[[78,23],[16,21]],tuck:[[140,23],[185,21]],reach:[[55,23],[2,23]]};
 function chain(root,A,B,t){let[x,y]=root;const pts=[[x,y]],ang=[];
   for(let i=0;i<A.length;i++){const a=turnTo(A[i][0]*Math.PI/180,B[i][0]*Math.PI/180,t),l=mix(A[i][1],B[i][1],t);
     x+=Math.cos(a)*l;y+=Math.sin(a)*l;pts.push([x,y]);ang.push(a)}
