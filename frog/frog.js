@@ -13,7 +13,7 @@ const turnTo=(a,b,t)=>a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*t;
 
 /* The frog faces +x and is about 100 units long. Each limb is a chain of segments: [angle in degrees, length]. */
 const HIND={fold:[[42,42],[190,41],[34,30]],long:[[165,43],[188,47],[168,31]]};
-const FRONT={sit:[[78,23],[16,21]],tuck:[[140,23],[185,21]],reach:[[55,23],[2,23]]};
+const FRONT={sit:[[66,23],[9,21]],tuck:[[140,23],[185,21]],reach:[[55,23],[2,23]]};
 function chain(root,A,B,t){let[x,y]=root;const pts=[[x,y]],ang=[];
   for(let i=0;i<A.length;i++){const a=turnTo(A[i][0]*Math.PI/180,B[i][0]*Math.PI/180,t),l=mix(A[i][1],B[i][1],t);
     x+=Math.cos(a)*l;y+=Math.sin(a)*l;pts.push([x,y]);ang.push(a)}
@@ -57,6 +57,8 @@ function band(c,x0,x1,w){c.beginPath();
   for(let y=30;y>=-30;y-=3)c.lineTo(x0+Math.sin(y*.2+w+2)*2.8+Math.sin(y*.6+w)*1.1,y);
   c.closePath();c.fill()}
 
+/* k > 0 stretches the body (rising), k < 0 squishes it (landing) */
+function bodyScale(c,pose){const k=pose.stretch||0;c.scale(1+k,1-k*(k>0?.5:.8))}
 function drawFrog(c,pose){
   const L=limbs(pose);
   const ok=M.img.complete&&M.img.naturalWidth;
@@ -74,6 +76,7 @@ function drawFrog(c,pose){
       c.beginPath();c.moveTo(P[i][0]-1.5,P[i][1]-2);c.lineTo(P[i+1][0]-1.5,P[i+1][1]-2);c.stroke()}
     c.restore();
   }
+  c.save();bodyScale(c,pose);
   c.fillStyle=INK;c.fill(BODY);
   c.save();c.clip(BODY);
   if(ok)c.drawImage(M.img,0,0,256,128,-48,-24,100,48);
@@ -92,8 +95,9 @@ function drawFrog(c,pose){
     c.fillStyle='#fff';blob(c,33.5,18.2*s-2.4,1.9,1.5);c.restore();
     c.fillStyle='rgba(0,0,0,.7)';blob(c,48,3.6*s,1.3,1.1);
   }
+  c.restore();
 }
-function silhouette(c,pose){c.fillStyle='#003a52';for(const l of limbs(pose)){c.fill(l.skin);c.fill(l.tip)}c.fill(BODY);blob(c,31,17.5,9,8);blob(c,31,-17.5,9,8)}
+function silhouette(c,pose){c.fillStyle='#003a52';for(const l of limbs(pose)){c.fill(l.skin);c.fill(l.tip)}c.save();bodyScale(c,pose);c.fill(BODY);blob(c,31,17.5,9,8);blob(c,31,-17.5,9,8);c.restore()}
 
 /* choreography */
 const SIT=.55,CROUCH=.2,AIR=.56,LAND=.34,BEAT=SIT+CROUCH+AIR+LAND,GAP=1.4;
@@ -133,9 +137,9 @@ function state(t){
     /* legs fire straight, trail, then fold under before touchdown */
     s.pose.hind=u<.62?1-Math.pow(1-clamp(u/.24),3):1-ease((u-.62)/.38);
     s.pose.tuck=ease(u/.2);s.pose.reach=ease((u-.5)/.38);
-    const st=Math.sin(Math.PI*clamp(u/.45));const off=1-ease(u/.14);s.sx=1+.1*st-.08*off;s.sy=1-.07*st+.07*off}
-  else{const u=clamp(c/LAND),hit=Math.sin(Math.PI*u)*(1-u*.4);
-    s.x=h.x1;s.y=h.y1;s.sx=1-.13*hit;s.sy=1+.12*hit;
+    s.pose.stretch=.11*Math.sin(Math.PI*u); /* longest at the highest point */const off=1-ease(u/.14);s.sx=1-.08*off;s.sy=1+.07*off}
+  else{const u=clamp(c/LAND),hit=Math.sin(Math.PI*u)*(1-u*.4);s.pose.stretch=-.07*hit;
+    s.x=h.x1;s.y=h.y1;
     s.pose.land=true;s.pose.reach=1-ease(u)}
   return s;
 }
