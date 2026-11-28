@@ -82,7 +82,12 @@ function program(vs,fs){const p=gl.createProgram();for(const[t,src]of[[gl.VERTEX
 const CAMERA=`uniform mat3 rot;uniform vec3 target;uniform float dist,focal;uniform vec2 view;
 vec4 project(vec3 q){float z=dist-q.z;return vec4(q.x*focal/view.x*2.,q.y*focal/view.y*2.,(z-dist)/1200.*z,z);}`;
 const solid=program(CAMERA+`layout(location=0) in vec3 p;layout(location=1) in vec3 n;layout(location=2) in float k;
-out vec3 vn,vq;out float vk;void main(){vq=rot*(p-target);vn=rot*n;vk=k;gl_Position=project(vq);}`,
+out vec3 vn,vq;out float vk;uniform float time;
+/* slow drift that depends only on position, so joined branches stay joined; the body stays still */
+vec3 sway(vec3 w){float a=smoothstep(10.,220.,length(w));
+ return a*(vec3(sin(time*.80+w.y*.021+w.z*.013),sin(time*.63+w.x*.019+2.1),sin(time*.71+w.y*.017+w.x*.011+4.2))*9.
+ +vec3(sin(time*1.15+w.y*.055),sin(time*.97+w.x*.050),0.)*2.5);}
+void main(){vq=rot*(p+sway(p)-target);vn=rot*n;vk=k;gl_Position=project(vq);}`,
 `in vec3 vn,vq;in float vk;uniform float dist,span;out vec4 o;
 void main(){vec3 n=normalize(vn),eye=normalize(vec3(0.,0.,dist)-vq),key=normalize(vec3(-.5,.7,.6));
  vec3 base=vk>.5?vec3(1.,.87,.08):vec3(.96,.95,.91),shade=vk>.5?vec3(.50,.40,.02):vec3(.13,.40,.55);
@@ -107,12 +112,13 @@ function upload(){
   gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,4,gl.FLOAT,false,0,0);
 }
 /* camera: zooming in moves the aim from the middle of the tree to the cell body */
-let yaw=-.35,pitch=.1,zoom=1.5,goal=null,idle=true,timer;
+let yaw=-.35,pitch=.1,zoom=1.15,goal=null,idle=true,timer,last=0;
 function render(now){
+  const dt=last?Math.min(.05,(now-last)/1000):0;last=now;
   const dpr=Math.min(devicePixelRatio||1,2),W=cv.clientWidth,H=cv.clientHeight,w=Math.round(W*dpr),h=Math.round(H*dpr);
   if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
   if(goal){zoom+=(goal-zoom)*.06;if(Math.abs(goal-zoom)<.02){zoom=goal;goal=null}}
-  else if(idle)yaw+=.0016;
+  if(idle)yaw=(yaw+dt*.16)%(Math.PI*2);
   const size=[0,1,2].map(k=>box.hi[k]-box.lo[k]),mid=[0,1,2].map(k=>(box.hi[k]+box.lo[k])/2);
   const wide=Math.max(size[0],size[2])*.92,fit=Math.min(W/wide,H*.68/size[1]),lean=smooth((zoom-1)/3);
   const target=mid.map(v=>v*(1-lean)),span=Math.max(40,Math.max(...size)*.55/Math.pow(zoom,.7));
@@ -122,13 +128,13 @@ function render(now){
   gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   const set=p=>{gl.useProgram(p);gl.uniformMatrix3fv(U(p,'rot'),false,rot);gl.uniform3fv(U(p,'target'),target);gl.uniform1f(U(p,'dist'),dist);gl.uniform1f(U(p,'focal'),focal);gl.uniform2f(U(p,'view'),w,h)};
   gl.enable(gl.DEPTH_TEST);gl.depthMask(true);gl.disable(gl.BLEND);
-  set(solid);gl.uniform1f(U(solid,'span'),span);gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,count,gl.UNSIGNED_INT,0);
+  set(solid);gl.uniform1f(U(solid,'span'),span);gl.uniform1f(U(solid,'time'),now/1000);gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,count,gl.UNSIGNED_INT,0);
   gl.depthMask(false);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
   set(specks);gl.uniform1f(U(specks,'time'),now/1000);gl.uniform1f(U(specks,'scale'),dpr);gl.bindVertexArray(svao);gl.drawArrays(gl.POINTS,0,nSpecks);
   requestAnimationFrame(render);
 }
 const touches=new Map();let pinch=0;
-const resume=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!touches.size&&zoom<2)idle=true},4000)};
+const resume=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!touches.size)idle=true},4000)};
 const setZoom=z=>{zoom=Math.max(.8,Math.min(16,z));goal=null};
 cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);touches.set(e.pointerId,[e.clientX,e.clientY]);idle=false;goal=null;pinch=0};
 cv.onpointermove=e=>{const p=touches.get(e.pointerId);if(!p)return;const q=[e.clientX,e.clientY];touches.set(e.pointerId,q);
