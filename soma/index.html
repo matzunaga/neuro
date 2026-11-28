@@ -15,7 +15,7 @@
 .soma-app .masthead{left:1.5rem}
 .soma-app .topright{top:calc(var(--safe-top) - .6rem)}
 .soma-app #field{touch-action:none}
-.soma-app .key{position:absolute;z-index:3;left:0;right:0;bottom:calc(var(--safe-bottom) + 3rem);margin:0;text-align:center;font-size:.7rem;letter-spacing:.08em;color:#282828;pointer-events:none;text-shadow:0 0 .5em #bdeefb,0 0 .5em #bdeefb,0 0 .3em #bdeefb}
+.soma-app .key{line-height:2;position:absolute;z-index:3;left:0;right:0;bottom:calc(var(--safe-bottom) + 4.4rem);margin:0;text-align:center;font-size:.7rem;letter-spacing:.08em;color:#282828;pointer-events:none;text-shadow:0 0 .5em #bdeefb,0 0 .5em #bdeefb,0 0 .3em #bdeefb}
 .soma-app .key i{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin:0 .35em 0 1em}
 .soma-app .credit{max-height:64vh}
 .soma-app .credit dl{grid-template-columns:1fr;gap:.2rem}
@@ -33,18 +33,19 @@
     <p class="eyebrow">About and credit</p>
     <dl>
       <dt>What you see</dt><dd>One reconstructed human neuron, H16.06.004.01.04.05, from the middle temporal gyrus, layer 3. The database lists it as having spiny dendrites.</dd>
+      <dt>Movement</dt><dd>Beads show packages carried along the axon, in real time: outward at 2 to 5 micrometers per second, back at 1 to 3 (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2173776/">source</a>; the outward range is a stated maximum). The flash shows the direction of a signal, from dendrites to cell body to axon, slowed down enormously. Adult branches mostly hold their shape, so they stay still.</dd>
       <dt>Where it came from</dt><dd>Tissue removed during a patient’s surgery for epilepsy and donated to research.</dd>
       <dt>Colors</dt><dd>White: cell body and dendrites. Yellow: axon.</dd>
       <dt>Data</dt><dd>Allen Cell Types Database. &copy; Allen Institute for Brain Science. <a href="https://celltypes.brain-map.org/experiment/morphology/508298270">This cell’s record</a>. Reuse is under the <a href="https://alleninstitute.org/terms-of-use/">Allen Institute terms of use</a>.</dd>
       <dt>Drawing</dt><dd>The traced points give position and thickness. A circle is swept along each branch. Thin branches are widened so they show on a phone, and branches are thickened where they meet the cell body. The path was slightly simplified and smoothed.</dd>
-      <dt>Not from the data</dt><dd>The shape of the cell body’s surface (only its center and size are recorded), colors, lighting, depth haze, the slow swaying of the branches and the floating specks. No spines or inner parts are shown.</dd>
+      <dt>Not from the data</dt><dd>The shape of the cell body’s surface (only its center and size are recorded), colors, lighting, depth haze, floating specks, and the size, number and timing of the beads and flashes. No spines or inner parts are shown.</dd>
     </dl>
     <p class="fine">For illustration only.</p>
   </aside>
-  <p class="key"><i style="background:#f6f3e8"></i>Dendrites<i style="background:#ffe21a"></i>Axon</p>
+  <p class="key"><i style="background:#f6f3e8"></i>Dendrites<i style="background:#ffe21a"></i>Axon<br><i style="background:#e5201a"></i>Cargo going out<i style="background:#282828"></i>Cargo coming back</p>
   <footer class="footer"><span class="controls"><button class="link" id="close">Cell body</button></span><button class="link" id="fit">Whole</button></footer>
   <p class="offline-notice" id="offline" hidden>Could not draw the cell on this device.</p>
 </main>
-<script src="soma.js?v=4"></script>
+<script src="soma.js?v=6"></script>
 </body>
 </html>
