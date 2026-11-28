@@ -12,7 +12,7 @@ const clamp=v=>Math.max(0,Math.min(1,v)),smooth=v=>{v=clamp(v);return v*v*(3-2*v
 /* ---------- geometry ---------- */
 const V=[],I=[];
 function vert(p,n,k,s){V.push(p[0],p[1],p[2],n[0],n[1],n[2],k,s);return V.length/8-1}
-const SIDES=10;
+const SIDES=14;
 function tube(pts,rad,kind,far){
   const rings=[];let side=null;
   for(let i=0;i<pts.length;i++){
@@ -47,7 +47,7 @@ function build(data){
     /* soften the tracing's zigzag; ends stay put so branches stay joined */
     for(let pass=0;pass<2;pass++){const old=c.p.slice();for(let i=1;i<last;i++)c.p[i]=[0,1,2].map(k=>old[i][k]*.5+(old[i-1][k]+old[i+1][k])*.25)}
     for(let i=0;i<last;i++){
-      const a=c.p[Math.max(i-1,0)],b=c.p[i],d=c.p[i+1],e=c.p[Math.min(i+2,last)],steps=Math.max(1,Math.min(10,Math.ceil(len(sub(d,b))/1.6)));
+      const a=c.p[Math.max(i-1,0)],b=c.p[i],d=c.p[i+1],e=c.p[Math.min(i+2,last)],steps=Math.max(1,Math.min(14,Math.ceil(len(sub(d,b))/1.2)));
       at[i]=P.length;for(let s=0;s<steps;s++){const t=s/steps;P.push([0,1,2].map(k=>spline(a[k],b[k],d[k],e[k],t)));Q.push(c.r[i]+(c.r[i+1]-c.r[i])*t)}
     }
     at[last]=P.length;P.push(c.p[last]);Q.push(c.r[last]);
@@ -83,7 +83,7 @@ function soma(R,roots){
   const t=(1+Math.sqrt(5))/2;
   let P=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(norm);
   let F=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
-  for(let s=0;s<5;s++){const seen=new Map(),G=[],mid=(a,b)=>{const key=a<b?a+'_'+b:b+'_'+a;let m=seen.get(key);if(m===undefined){m=P.push(norm(add(P[a],P[b])))-1;seen.set(key,m)}return m};
+  for(let s=0;s<6;s++){const seen=new Map(),G=[],mid=(a,b)=>{const key=a<b?a+'_'+b:b+'_'+a;let m=seen.get(key);if(m===undefined){m=P.push(norm(add(P[a],P[b])))-1;seen.set(key,m)}return m};
     for(const[a,b,c]of F){const x=mid(a,b),y=mid(b,c),z=mid(c,a);G.push([a,x,z],[b,y,x],[c,z,y],[x,y,z])}F=G}
   const Q=P.map(u=>{let bulge=0;for(const d of roots){bulge+=Math.pow(Math.max(0,dot(u,d)),9)}
     const lumps=Math.sin(u[0]*5.1+u[1]*2.3)*Math.sin(u[1]*4.3-u[2]*3.7)*Math.sin(u[2]*5.9+u[0]*1.7);
@@ -125,17 +125,29 @@ function program(vs,fs){const p=gl.createProgram();for(const[t,src]of[[gl.VERTEX
 const CAMERA=`uniform mat3 rot;uniform vec3 target;uniform float dist,focal;uniform vec2 view;
 vec4 project(vec3 q){float z=dist-q.z;return vec4(q.x*focal/view.x*2.,q.y*focal/view.y*2.,(z-dist)/1200.*z,z);}`;
 const solid=program(CAMERA+`layout(location=0) in vec3 p;layout(location=1) in vec3 n;layout(location=2) in float k;layout(location=3) in float s;
-out vec3 vn,vq;out float vk,vs;uniform float inward,outward;
+out vec3 vn,vq,vp,vm;out float vk,vs;uniform float inward,outward;
 void main(){float front=k>.5?outward:inward,g=(s-front)/30.,swell=front<0.?0.:exp(-g*g)*smoothstep(10.,40.,s);
- vq=rot*(p+n*swell*2.2-target);vn=rot*n;vk=k;vs=s;gl_Position=project(vq);}`,
-`in vec3 vn,vq;in float vk,vs;uniform float dist,span,inward,outward,body;out vec4 o;
-void main(){vec3 n=normalize(vn),eye=normalize(vec3(0.,0.,dist)-vq),key=normalize(vec3(-.5,.7,.6));
+ vq=rot*(p+n*swell*2.2-target);vn=rot*n;vp=p;vm=n;vk=k;vs=s;gl_Position=project(vq);}`,
+`in vec3 vn,vq,vp,vm;in float vk,vs;uniform float dist,span,inward,outward,body;uniform mat3 rot;out vec4 o;
+float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.17,.13));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float noise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
+ return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+  mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+/* membrane grain: coarse lumps plus fine pores, in micrometers */
+float skin(vec3 p){return noise(p*.75)*.65+noise(p*1.9+7.3)*.35;}
+void main(){/* the grain fades out once it is finer than the screen can show */
+ float seen=1.-smoothstep(.25,.9,length(fwidth(vp))),h=skin(vp),e=.18;
+ vec3 slope=(vec3(skin(vp+vec3(e,0,0)),skin(vp+vec3(0,e,0)),skin(vp+vec3(0,0,e)))-h)/e,m=normalize(vm);
+ slope-=m*dot(slope,m);
+ vec3 n=normalize(mix(normalize(vn),rot*normalize(m-slope*.75),seen)),eye=normalize(vec3(0.,0.,dist)-vq),key=normalize(vec3(-.5,.7,.6));
  vec3 base=vk>.5?vec3(1.,.87,.08):vec3(.96,.95,.91),shade=vk>.5?vec3(.50,.40,.02):vec3(.13,.40,.55);
  float d=dot(n,key)*.5+.5,rim=pow(1.-max(dot(n,eye),0.),2.5),spec=pow(max(dot(reflect(-key,n),eye),0.),24.);
  vec3 c=mix(shade,base,d*d*1.15)+rim*vec3(.35,.75,.9)*.6+spec*.35;
+ c*=1.+(h-.5)*.28*seen;
+ c+=(vk>.5?vec3(.30,.22,.0):vec3(.10,.16,.20))*pow(1.-max(dot(normalize(vn),eye),0.),1.6);
  float front=vk>.5?outward:inward,g=(vs-front)/30.,glow=front<0.?0.:exp(-g*g);
  if(vk<.5&&vs<14.)glow=max(glow,body);
- c=mix(c,vk>.5?vec3(1.):vec3(1.,.84,.0),clamp(glow,0.,1.));
+ c=mix(c,(vk>.5?vec3(1.):vec3(1.,.84,.0))*(.62+.5*d*d)+spec*.3+(h-.5)*.25*seen,clamp(glow,0.,1.)*.85);
  float haze=smoothstep(-.2,1.,-vq.z/span)*.75*(1.-.7*glow);
  o=vec4(mix(c,vec3(.06,.68,.85),haze),1.);}`);
 const specks=program(CAMERA+`layout(location=0) in vec4 p;uniform float time,scale;out float a;
@@ -145,7 +157,7 @@ void main(){vec3 w=p.xyz+vec3(sin(time*.13+p.w*9.),cos(time*.11+p.w*7.),sin(time
 const dots=program(CAMERA+`layout(location=0) in vec4 p;layout(location=1) in float way;uniform float dpr;out float w;out float fade;uniform float span;
 void main(){vec3 q=rot*(p.xyz-target);float r=max(p.w*1.25,1.);fade=smoothstep(-.2,1.,-q.z/span)*.75;w=way;
  gl_Position=project(q);vec4 near=project(q+vec3(0.,0.,p.w+r));gl_Position.z=near.z/near.w*gl_Position.w;
- gl_PointSize=clamp(2.*r*focal/max(dist-q.z,1.),2.2*dpr,40.);}`,
+ gl_PointSize=clamp(2.*r*focal/max(dist-q.z,1.),2.2*dpr,22.*dpr);}`,
 `in float w,fade;out vec4 o;void main(){vec2 c=gl_PointCoord*2.-1.;float d=dot(c,c);if(d>1.)discard;
  vec3 n=vec3(c.x,-c.y,sqrt(1.-d));float l=dot(n,normalize(vec3(-.5,.7,.6)))*.5+.5;
  vec3 base=w>.5?vec3(.90,.12,.10):vec3(.16,.16,.16);vec3 col=base*(.55+.7*l)+pow(l,12.)*.4;
@@ -168,7 +180,7 @@ function upload(){
 let yaw=-.35,pitch=.1,zoom=1.15,goal=null,idle=true,timer,last=0;
 function render(now){
   const dt=last?Math.max(0,Math.min(.25,(now-last)/1000)):0;last=now;
-  const dpr=Math.min(devicePixelRatio||1,2),W=cv.clientWidth,H=cv.clientHeight,w=Math.round(W*dpr),h=Math.round(H*dpr);
+  const dpr=Math.min(devicePixelRatio||1,3),W=cv.clientWidth,H=cv.clientHeight,w=Math.round(W*dpr),h=Math.round(H*dpr);
   if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
   if(goal){zoom+=(goal-zoom)*.06;if(Math.abs(goal-zoom)<.02){zoom=goal;goal=null}}
   if(idle)yaw=(yaw+dt*.16)%(Math.PI*2);
