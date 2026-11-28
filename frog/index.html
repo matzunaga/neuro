@@ -13,7 +13,11 @@
 .frog-app h1 .rest{position:static}
 .frog-app h1 .eyebrow{left:50%;bottom:100%;margin-bottom:1.1em;transform:translateX(-50%);padding-left:.16em}
 .frog-app .masthead{left:1.5rem}
-.frog-app .note{position:absolute;z-index:4;left:1.5rem;right:1.5rem;bottom:var(--safe-bottom);text-align:center;font-size:.7rem;line-height:1.7;color:#282828;pointer-events:none}
+.frog-app .topright{top:calc(var(--safe-top) - .6rem)}
+.frog-app .hint{position:absolute;z-index:3;left:0;right:0;bottom:var(--safe-bottom);margin:0;text-align:center;font-size:.75rem;color:#282828;opacity:.8;pointer-events:none}
+.frog-app .credit{max-height:64vh}
+.frog-app .credit dl{grid-template-columns:1fr;gap:.2rem}
+.frog-app .credit dd{margin-bottom:.6rem}
 </style>
 </head>
 <body>
@@ -21,8 +25,23 @@
   <canvas id="field" aria-label="A small brightly coloured frog seen from above, hopping across the screen. Tap to play again."></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header class="masthead"><h1>F<span class="rest">rog<span class="eyebrow">Poison dart</span></span></h1></header>
-  <p class="note">Tap to send it again<br><span id="morph">Yellow-banded poison frog</span><br>Markings adapted from a photo by <span id="by">Kaden Slone</span>, CC BY</p>
+  <div class="topright"><button class="link" id="about" aria-expanded="false" aria-controls="credit">About these frogs</button></div>
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">About and credit</p>
+    <dl>
+      <dt>What you see</dt><dd>Poison frogs seen from above, hopping across water. Each new run brings in the next of four.</dd>
+      <dt>Yellow-banded poison frog</dt><dd><i>Dendrobates leucomelas</i>. Photo &copy; Kaden Slone, <a href="https://www.inaturalist.org/observations/406881097">iNaturalist observation 406881097</a>.</dd>
+      <dt>Green and black poison frog</dt><dd><i>Dendrobates auratus</i>. Photo &copy; Roger A. Morales-Flores, <a href="https://www.inaturalist.org/observations/142666554">iNaturalist observation 142666554</a>.</dd>
+      <dt>Strawberry poison frog</dt><dd><i>Oophaga pumilio</i>. Photo &copy; Roger A. Morales-Flores, <a href="https://www.inaturalist.org/observations/402618106">iNaturalist observation 402618106</a>.</dd>
+      <dt>Strawberry poison frog, blue jeans form</dt><dd><i>Oophaga pumilio</i>. Photo &copy; Tom Kennedy, <a href="https://www.inaturalist.org/observations/102888169">iNaturalist observation 102888169</a>.</dd>
+      <dt>License</dt><dd>Photos used under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. They were cropped and stretched onto a drawn frog. The photographers do not endorse this page.</dd>
+      <dt>Limits</dt><dd>Only the markings come from the photos. Body shape, toes, eyes, motion and ripples are drawn in code, and hidden or folded parts of the legs are approximate. This is not a guide for identifying frogs.</dd>
+    </dl>
+    <p class="fine">For illustration only.</p>
+  </aside>
+  <p class="hint">Tap to send it again</p>
 </main>
-<script src="frog.js?v=8"></script>
+<script src="frog.js?v=9"></script>
 </body>
 </html>

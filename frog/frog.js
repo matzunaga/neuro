@@ -114,7 +114,7 @@ function plan(){
   hops=[];for(let i=0;i<n;i++){const p=at(i),q=at(i+1);hops.push({x0:p[0],y0:p[1],x1:q[0],y1:q[1],sit:i===0?0:i===mid?SIT*2.2:SIT*1.6})}
   let t=.35;for(const h of hops){h.t=t;t+=h.sit+CROUCH+AIR+LAND}total=t+GAP;
 }
-function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];credit();plan()}
+function next(){M=MORPHS[(MORPHS.indexOf(M)+1)%MORPHS.length];plan()}
 function state(t){
   let h=hops[0];for(const q of hops)if(t>=q.t)h=q;
   const k=Math.max(0,t-h.t),dir=Math.atan2(h.y1-h.y0,h.x1-h.x0);
@@ -160,8 +160,9 @@ function paint(s,t){
 }
 function size(){dpr=Math.min(devicePixelRatio||1,3);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   S=Math.min(W*.0026,H*.0017,1.7)*.34;plan()}
-const label=document.getElementById('morph'),by=document.getElementById('by');
-function credit(){label.textContent=M.name;by.textContent=M.by}
+const $=id=>document.getElementById(id);
+$('about').onclick=()=>{const o=$('credit').hidden;$('credit').hidden=!o;$('about').setAttribute('aria-expanded',o);document.querySelector('main').classList.toggle('open',o)};
+$('closeCredit').onclick=()=>$('about').click();
 const frozen=new URLSearchParams(location.search).get('t');
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 let playing=!calm;
