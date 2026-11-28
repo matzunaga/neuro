@@ -222,7 +222,7 @@ $('fit').onclick=()=>{goal=1;idle=true};
 let cells=[],at=0,ask=0,running=false;
 const free=()=>{for(const v of[vao,svao,bvao])if(v)gl.deleteVertexArray(v);for(const b of buffers.splice(0))gl.deleteBuffer(b)};
 function describe(c){
-  $('which').textContent=c.region.replace(/^./,m=>m.toUpperCase())+' · '+c.cell_type.toLowerCase();
+  $('which').textContent=c.region.replace(/^./,m=>m.toUpperCase())+'\n'+c.cell_type.toLowerCase();
   $('count').textContent=(at+1)+' / '+cells.length;
   $('what').textContent='One reconstructed human neuron, '+c.name+', from the '+c.region+'. The database lists it as: '+c.cell_type.toLowerCase()+'. Cell '+(at+1)+' of '+cells.length+' on this page.';
   $('tissue').textContent=c.tissue+'. Tissue removed during a patient\u2019s surgery and donated to research.';

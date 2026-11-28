@@ -15,10 +15,12 @@
 .soma-app .masthead{left:1.5rem}
 .soma-app .topright{top:calc(var(--safe-top) - .6rem)}
 .soma-app #field{touch-action:none}
-.soma-app .key{line-height:2;position:absolute;z-index:3;left:0;right:0;bottom:calc(var(--safe-bottom) + 4.8rem);margin:0;text-align:center;font-size:.7rem;letter-spacing:.08em;color:#282828;pointer-events:none;text-shadow:0 0 .5em #bdeefb,0 0 .5em #bdeefb,0 0 .3em #bdeefb}
-.soma-app .key i{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin:0 .35em 0 1em}
-.soma-app .pick{position:absolute;z-index:4;left:1.5rem;bottom:calc(var(--safe-bottom) + 1.4rem);display:flex;align-items:center;gap:.8rem;font-size:.75rem;letter-spacing:.1em;color:#282828}
-.soma-app .pick button{padding:.5rem .2rem}
+.soma-app .key{position:absolute;z-index:3;left:1.5rem;top:calc(var(--safe-top) + 5.8rem);margin:0;max-width:15rem;line-height:2;text-align:left;pointer-events:none;font-size:.625rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#282828}
+.soma-app .key span{white-space:pre-line;display:block;margin-bottom:.5rem;line-height:1.7}
+.soma-app .key b{display:block;font-weight:inherit}
+.soma-app .key i{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.7em}
+.soma-app .pick{position:absolute;z-index:4;left:1.5rem;bottom:var(--safe-bottom);display:flex;align-items:center;gap:.8rem;font-size:.625rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#282828}
+.soma-app .pick .link{padding:.25rem .2rem;color:#282828}
 .soma-app.open .pick,.soma-app.open .key{display:none}
 .soma-app .credit{max-height:64vh}
 .soma-app .credit dl{grid-template-columns:1fr;gap:.2rem}
@@ -45,11 +47,11 @@
     </dl>
     <p class="fine">For illustration only.</p>
   </aside>
-  <p class="key"><span id="which"></span><br><i style="background:#f6f3e8"></i>Dendrites<i style="background:#ffe21a"></i>Axon<br><i style="background:#e5201a"></i>Cargo going out<i style="background:#282828"></i>Cargo coming back</p>
+  <p class="key"><span id="which"></span><b><i style="background:#f6f3e8"></i>Dendrites</b><b><i style="background:#ffe21a"></i>Axon</b><b><i style="background:#e5201a"></i>Cargo going out</b><b><i style="background:#282828"></i>Cargo coming back</b></p>
   <div class="pick"><button class="link" id="prev" aria-label="Previous cell">&larr;</button><span id="count" aria-live="polite"></span><button class="link" id="next" aria-label="Next cell">Next cell &rarr;</button></div>
   <footer class="footer"><span class="controls"><button class="link" id="close">Cell body</button></span><button class="link" id="fit">Whole</button></footer>
   <p class="offline-notice" id="offline" hidden>Could not draw the cell on this device.</p>
 </main>
-<script src="soma.js?v=11"></script>
+<script src="soma.js?v=12"></script>
 </body>
 </html>
