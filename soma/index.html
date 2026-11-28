@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00b3dc">
+<title>Soma — a real human brain cell in 3D</title>
+<meta name="description" content="A reconstructed human neuron from the Allen Cell Types Database, built as a solid 3D object.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css?v=36">
+<style>
+.soma-app h1{position:relative;display:inline-block;margin-top:.7rem}
+.soma-app h1 .rest{position:static}
+.soma-app h1 .eyebrow{left:50%;bottom:100%;margin-bottom:1.1em;transform:translateX(-50%);padding-left:.16em;white-space:nowrap}
+.soma-app .masthead{left:1.5rem}
+.soma-app .topright{top:calc(var(--safe-top) - .6rem)}
+.soma-app #field{touch-action:none}
+.soma-app .key{position:absolute;z-index:3;left:0;right:0;bottom:calc(var(--safe-bottom) + 3rem);margin:0;text-align:center;font-size:.7rem;letter-spacing:.08em;color:#282828;pointer-events:none;text-shadow:0 0 .5em #bdeefb,0 0 .5em #bdeefb,0 0 .3em #bdeefb}
+.soma-app .key i{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin:0 .35em 0 1em}
+.soma-app .credit{max-height:64vh}
+.soma-app .credit dl{grid-template-columns:1fr;gap:.2rem}
+.soma-app .credit dd{margin-bottom:.6rem}
+</style>
+</head>
+<body>
+<main class="neuron-app soma-app">
+  <canvas id="field" aria-label="A human neuron in 3D. Drag to turn, pinch to zoom."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="masthead"><h1>S<span class="rest">oma<span class="eyebrow">Human brain cell</span></span></h1></header>
+  <div class="topright"><button class="link" id="about" aria-expanded="false" aria-controls="credit">About this cell</button></div>
+  <aside class="credit" id="credit" hidden>
+    <button class="close" id="closeCredit" aria-label="Close">Close</button>
+    <p class="eyebrow">About and credit</p>
+    <dl>
+      <dt>What you see</dt><dd>One reconstructed human neuron, H16.06.004.01.04.05, from the middle temporal gyrus, layer 3. The database lists it as having spiny dendrites.</dd>
+      <dt>Where it came from</dt><dd>Tissue removed during a patient’s surgery for epilepsy and donated to research.</dd>
+      <dt>Colors</dt><dd>White: cell body and dendrites. Yellow: axon.</dd>
+      <dt>Data</dt><dd>Allen Cell Types Database. &copy; Allen Institute for Brain Science. <a href="https://celltypes.brain-map.org/experiment/morphology/508298270">This cell’s record</a>. Reuse is under the <a href="https://alleninstitute.org/terms-of-use/">Allen Institute terms of use</a>.</dd>
+      <dt>Drawing</dt><dd>The traced points give position and thickness. A circle is swept along each branch. Thin branches are widened so they show on a phone, and branches are thickened where they meet the cell body. The path was slightly simplified and smoothed.</dd>
+      <dt>Not from the data</dt><dd>The shape of the cell body’s surface (only its center and size are recorded), colors, lighting, depth haze and the floating specks. No spines or inner parts are shown.</dd>
+    </dl>
+    <p class="fine">For illustration only.</p>
+  </aside>
+  <p class="key"><i style="background:#f6f3e8"></i>Dendrites<i style="background:#ffe21a"></i>Axon</p>
+  <footer class="footer"><span class="controls"><button class="link" id="close">Cell body</button></span><button class="link" id="fit">Whole</button></footer>
+  <p class="offline-notice" id="offline" hidden>Could not draw the cell on this device.</p>
+</main>
+<script src="soma.js?v=2"></script>
+</body>
+</html>
